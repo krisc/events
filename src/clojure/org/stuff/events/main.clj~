@@ -1,0 +1,47 @@
+(ns org.stuff.events.main
+  (:use [neko.activity :only [defactivity set-content-view!]]
+        [neko.threading :only [on-ui]]
+        [neko.ui :only [make-ui]]
+        [neko.application :only [defapplication]]))
+
+(declare android.widget.LinearLayout mylayout)
+(declare add-event)
+
+(defn mt-listing [] (atom ""))
+(def listing (mt-listing))
+
+(def main-layout [:linear-layout {:orientation :vertical,
+                                  :id-holder :true,
+                                  :def `mylayout}
+                  [:edit-text {:hint "Event name",
+                               :id ::name}]
+                  [:edit-text {:hint "Event location",
+                               :id ::location}]
+                  [:button {:text "+ Event",
+                            :on-click (fn [_](add-event))}]
+                  [:text-view {:text @listing,
+                              :id ::listing}]])
+
+(defn get-elmt [elmt]
+  (str (.getText (elmt (.getTag mylayout)))))
+
+(defn set-elmt [elmt s]
+  (on-ui (.setText (elmt (.getTag mylayout)) s)))
+
+(defn update-ui []
+  (set-elmt ::listing @listing)
+  (set-elmt ::location "")
+  (set-elmt ::name ""))
+
+(defn add-event []
+  (swap! listing str (get-elmt ::location) " - " 
+		   (get-elmt ::name) "\n")
+  (update-ui))
+
+(defactivity org.stuff.events.MyActivity
+  :def a
+  :on-create
+  (fn [this bundle]
+    (on-ui
+     (set-content-view! a
+      (make-ui main-layout)))))
