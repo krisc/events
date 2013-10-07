@@ -65,7 +65,7 @@ computer. If not, you can setup an [emulator](http://developer.android.com/tools
 
 ### Define the Layout
 
-Let's open the main Clojure source file located at `./src/events/src/clojure.main.clj` in `emacs` and start defining the layout and the application. Now run this in `emacs`: `M-x nrepl` and enter the local machine for 'Host' and '9999' for 'Port'. Now you have a REPL in `emacs` which is connected to your running app. As you will see in a bit, this is neat-o torpedo.
+Let's open the main Clojure source file located at `./src/clojure/org/stuff/events/main.clj` in `emacs` and start defining the layout and the application. Now run this in `emacs`: `M-x nrepl` and enter the local machine for 'Host' and '9999' for 'Port'. Now you have a REPL in `emacs` which is connected to your running app. As you will see in a bit, this is neat-o torpedo.
 
 To enter the namespace, type this command into the REPL: `(in-ns 'org.stuff.events.main)` To start evaluating definitions within our app's namespace, evaluate the `ns` form in the source file by entering the `emacs` command `C-c C-n` (or by moving the cursor after the closing parenthesis of the `ns` form and hitting `C-x C-e`).
 
