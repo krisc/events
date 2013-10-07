@@ -140,7 +140,7 @@ org.stuff.events.main> (str (.getText (::location (.getTag mylayout))))
 "My Place"
 ```
 
-Let's write a helper function for our convenience:
+Note that the return value for the widget objects will probably be different for you. Now let's write a helper function for our convenience:
 
 ```clojure
 (defn get-elmt [elmt]
