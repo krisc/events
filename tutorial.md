@@ -132,11 +132,12 @@ With these additions, we can now access the values of these elements using `.get
 [pic here]
 
 ```clojure
-=> (.getTag mylayout)
-
-=> (str (.getText (::name (.getTag mylayout))))
-
-=> (str (.getText (::location (.getTag mylayout))))
+org.stuff.events.main> (.getTag mylayout)
+{:org.stuff.events.main/location #<EditText android.widget.EditText@42315c30>, :org.stuff.events.main/name #<EditText android.widget.EditText@42206a18>}
+org.stuff.events.main> (str (.getText (::name (.getTag mylayout))))
+"Party"
+org.stuff.events.main> (str (.getText (::location (.getTag mylayout))))
+"My Place"
 ```
 
 Let's write a helper function for our convenience:
@@ -192,8 +193,8 @@ Before we define the callback function, let's play with the REPL and figure out 
 [pic here]
 
 ```clojure
-=> (swap! listing str (get-elmt ::location) " - " 
-		      (get-elmt ::name) "\n")
+org.stuff.events.main> (swap! listing str (get-elmt ::location) " - " 
+		       (get-elmt ::name) "\n")
 ```
 
 Next, we want to update the ui with the listing. We can use the `config` macrio in `neko.ui` to achieve this. Let's update the `ns` form at the top of the source:
@@ -208,7 +209,7 @@ Run `C-c C-n` to evaluate the `ns` form then enter this into the REPL:
 
 
 ```clojure
-=> (on-ui (config (::listing (.getTag mylayout)) :text @listing))
+org.stuff.events.main> (on-ui (config (::listing (.getTag mylayout)) :text @listing))
 ```
 
 Let's write another helper function for setting the text of our elements.
