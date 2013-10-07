@@ -195,6 +195,7 @@ Before we define the callback function, let's play with the REPL and figure out 
 ```clojure
 org.stuff.events.main> (swap! listing str (get-elmt ::location) " - " 
 		       (get-elmt ::name) "\n")
+"Your Place - Party\n"
 ```
 
 Next, we want to update the ui with the listing. We can use the `config` macrio in `neko.ui` to achieve this. Let's update the `ns` form at the top of the source:
