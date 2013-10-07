@@ -181,7 +181,7 @@ Well, we know that we need to add an event to the listing. First, let's add a ne
                                :id ::location}]
                   [:button {:text "+ Event",
                             :on-click (fn [_] (add-event))}]
-                  [:text-vew {:text @listing,
+                  [:text-view {:text @listing,
                               :id ::listing}]])
 ```
 
