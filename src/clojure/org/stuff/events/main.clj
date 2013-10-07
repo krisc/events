@@ -8,7 +8,7 @@
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
            (android.app DialogFragment)))
 
-(declare android.widget.LinearLayout mylayout)
+(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 (declare date-picker)
 (declare show-picker)
