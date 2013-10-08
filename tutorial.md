@@ -33,9 +33,11 @@ Now that you have been **forewarned**, let's begin.
 
 Let's make a simple event listing app. This will not be a full-fledged calendar app, but rather a simple tool to pencil in events and have them sorted in chronological order. I have a text file on my desktop that I use to pencil in dates for gigs, practices, and other events.
 
-![text document of event listing](https://github.com/krisc/events/blob/master/desktop.png)
+![text document of event listing](desktop.png)
 
 Our app will be based off of this simple idea.
+
+![our app](screen0.png)
 
 ### Using lein-droid to setup our project
 
@@ -93,7 +95,7 @@ Evaluate this `def` form. Let's change the `defactivity` form to look like this:
 
 To demonstrate the power of REPL driven development, move your cursor after the closing parenthesis of the `on-ui` form (after the third-to-last `)` from the end), then hit `C-x C-e`.
 
-[pic here]
+![screen 1](screen1.png)
 
 After you have finished geeking out on how cool what just happened was, let's add a button to the layout. Our `def` form for `main-layout` should now look like this:
 
@@ -106,7 +108,7 @@ After you have finished geeking out on how cool what just happened was, let's ad
 
 Evaluate this form. Then evaluate the `on-ui` form to update the app. (From now on, you can assume that newly added code should be evaluated.)
 
-[pic]
+![screen 2](screen2.png)
 
 ### Adding Functionality
 
@@ -127,9 +129,11 @@ The app doesn't really do anything right now. Let's add attributes to our layout
 
 In order to access the layout by name, we added a `:def` attribute to our `main-layout`, an `:id-holder` flag, and a forward declaration form near the top of the source file. Additionally, our `edit-text` elements have `:id` attributes with a keyword value. The `declare` form allows us later to compile this code using AOT (more on using `lein` to build later).
 
-With these additions, we can now access the values of these elements using `.getTag`. Enter some text into the edit-text fields in the running app then try these at the REPL:
+With these additions, we can now access the values of these elements using `.getTag`. Enter some text into the edit-text fields in the running app:
 
-[pic here]
+![screen 3](screen3.png)
+
+Then try these at the REPL:
 
 ```clojure
 org.stuff.events.main> (.getTag mylayout)
@@ -190,8 +194,6 @@ Here, we have a constructor which returns a new atom (an empty string). This ena
 
 Before we define the callback function, let's play with the REPL and figure out what we actually want to do when the user hits that button. First, we want to update the listing atom with the contents of the `:edit-text` fields. Enter an event in the running app then run this in the REPL:
 
-[pic here]
-
 ```clojure
 org.stuff.events.main> (swap! listing str (get-elmt ::location) " - " 
 		       (get-elmt ::name) "\n")
@@ -231,7 +233,7 @@ Let's have our callback function perform these two tasks:
 
 Now try hitting that button. Cool, huh?
 
-[pic here]
+![screen 5](screen5.png)
 
 If you need to clear your listing, just run `(def listing (mt-listing))`.
 
@@ -309,6 +311,9 @@ If you're coding along at home (and I hope you are!), here is what our code shou
 So far so good... So what? It might be a good idea to build your app right now by running at the terminal `lein droid doall`. Note that you may have to connect your REPL again after you run this command.
 
 ### Just One Little Fix
+
+![screen 6](screen6.png)
+
 If you rotated your screen, you may have noticed that the listing disappears. Let's fix that, shall we?
 
 ```clojure
@@ -323,12 +328,16 @@ If you rotated your screen, you may have noticed that the listing disappears. Le
      (set-elmt ::listing @listing))))
 ```
 
-Rotate your screen. The REPL never ceases to amaze me.
+Rotate your screen.
+
+![screen 4](screen4.png)
+
+Now that's what I'm talking about. The REPL never ceases to amaze me.
 
 ### The Date Picker
 What's the point of an event listing without sorted dates? Let's use java interop to make a date picker[<sup>5</sup>](#5).
 
-[pic of datepicker]
+![pic of datepicker](screen7.png)
 
 First, let's add some imports into our `ns` form:
 
