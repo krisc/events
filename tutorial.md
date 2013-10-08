@@ -799,7 +799,9 @@ The tools available for Android development are still young. Needless to say, yo
 Questions? Suggestions? Feel free to get in touch and [follow me on Twitter](https://twitter.com/zangderak).
 
 ###Notes
-<sup>1</sup><a name="1"></a> http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html
+<sup>1</sup><a name="1"></a>In ["Code's Worst Enemy"](http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html) Steve Yegge writes:
+>Bigger is just something you have to live with in Java. Growth is a fact of life. Java is like a variant of the game of Tetris in which none of the pieces can fill gaps created by the other pieces, so all you can do is pile them up endlessly.
+
 
 <sup>2</sup><a name="2"></a> http://www.niemanlab.org/2011/11/in-praise-of-impractical-programming/
 
