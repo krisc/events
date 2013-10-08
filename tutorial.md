@@ -142,7 +142,7 @@ org.stuff.events.main> (.getTag mylayout)
 org.stuff.events.main> (str (.getText (::name (.getTag mylayout))))
 "Party"
 org.stuff.events.main> (str (.getText (::location (.getTag mylayout))))
-"My Place"
+"Your Place"
 ```
 
 Note that the return value for the widget objects will probably be different for you. Now let's write a helper function for our convenience:
