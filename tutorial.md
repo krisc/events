@@ -794,7 +794,7 @@ And in `emacs`: `M-x nrepl`, local machine for 'Host', and '9999' for 'Port'. No
 Then evaluate the `ns` form to get back into your running app's namespace. The important thing to know is that all the new code you wrote after your last `build` has to be evaluated at the REPL in order to get back to your previous state. Running `lein droid doall` at the terminal at key points of development can save you some steps whenever you lose your REPL connection.
 
 ###Conclusion
-The tools available for Android development are still young. Needless to say, you will probably run into some issues and bugs along the way. If you are serious about pursuing this bleeding edge stuff, get connected with the maintainers of these tools. Alex Yakushev in particular has been very helpful and quick to respond to me personally as I was learning how to use `lein-droid`. Phil Hagelberg (a.k.a. [technomancy](https://github.com/technomancy)) of [lein](https://github.com/technomancy/leiningen) is also pretty responsive.
+The tools available for Android development are still young. Needless to say, you will probably run into some issues and bugs along the way. If you are serious about pursuing this bleeding edge stuff, get connected with the maintainers of these tools. Alex Yakushev in particular has been very helpful and quick to respond to me personally as I was learning how to use [lein-droid](https://github.com/clojure-android/lein-droid/issues?state=open). Phil Hagelberg (a.k.a. [technomancy](https://github.com/technomancy)) of [lein](https://github.com/technomancy/leiningen) is also pretty responsive.
 
 Questions? Comments? Feel free to get in touch and [follow me on Twitter](https://twitter.com/zangderak).
 
