@@ -1,4 +1,5 @@
 #Android App Development with Clojure: An Interactive Tutorial <img src="forever-in-love.png" align="top" alt="forever in love">
+by Kris Calabio
 
 ###Is there a better way?
 
@@ -795,7 +796,7 @@ Then evaluate the `ns` form to get back into your running app's namespace. The i
 ###Conclusion
 The tools available for Android development are still young. Needless to say, you will probably run into some issues and bugs along the way. If you are serious about pursuing this bleeding edge stuff, get connected with the maintainers of these tools. Alex Yakushev in particular has been very helpful and quick to respond to me personally as I was learning how to use `lein-droid`. Phil Hagelberg (a.k.a. [technomancy](https://github.com/technomancy)) of [lein](https://github.com/technomancy/leiningen) is also pretty responsive.
 
-Feel free to get in touch and [follow me on Twitter](https://twitter.com/zangderak).
+Questions? Suggestions? Feel free to get in touch and [follow me on Twitter](https://twitter.com/zangderak).
 
 ###Notes
 <sup>1</sup><a name="1"></a> http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html
