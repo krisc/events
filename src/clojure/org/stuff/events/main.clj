@@ -1,7 +1,7 @@
 (ns org.stuff.events.main
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui]]
+        [neko.ui :only [make-ui config]]
         [neko.application :only [defapplication]])
   (:import (java.util Calendar)
            (android.app Activity)
@@ -62,7 +62,7 @@
   (str (.getText (elmt (.getTag mylayout)))))
 
 (defn set-elmt [elmt s]
-  (on-ui (.setText (elmt (.getTag mylayout)) s)))
+  (on-ui (config (elmt (.getTag mylayout)) :text s)))
 
 (defn update-ui []
   (set-elmt ::listing (format-listing @listing))
