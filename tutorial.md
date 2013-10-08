@@ -1,4 +1,4 @@
-#Android App Development with Clojure: An Interactive Tutorial
+#Android App Development with Clojure: An Interactive Tutorial <img src="forever-in-love.png" align="top" alt="forever in love">
 
 ###Is there a better way?
 
