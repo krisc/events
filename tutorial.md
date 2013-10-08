@@ -1,3 +1,7 @@
+#Android App Development with Clojure: An Interactive Tutorial
+
+###Is there a better way?
+
 I've been programming in Java since I was an undergrad in college in 2006. While working a contract job in 2011-2012 in which I was hired to work with a huge mess of Java code[<sup>1</sup>](#1), I was left wondering if Java was rotting my brain. Surely, there has got to be a better way. After an impractical detour[<sup>2</sup>](#2), I decided to take on learning [Clojure](http://clojure.org/), a Lisp dialect for the JVM. After a two-year journey of hacking personal projects, Clojure is now my general programming language of choice.
 
 While learning how to write apps for [Android](http://developer.android.com/), I was back to programming in Java and again was left thinking that there has got to be a better way! I looked into developing Android apps using Clojure. Although there
@@ -61,9 +65,9 @@ computer. If not, you can setup an [emulator](http://developer.android.com/tools
 
 ### Define the Layout
 
-Let's open the main Clojure source file located at `./src/events/src/clojure.main.clj` in `emacs` and start defining the layout and the application. Now run this in `emacs`: `M-x nrepl` and enter the local machine for 'Host' and '9999' for 'Port'. Now you have a REPL in `emacs` which is connected to your running app. As you will see in a bit, this is neat-o torpedo.
+Let's open the main Clojure source file located at `./src/clojure/org/stuff/events/main.clj` in `emacs` and start defining the layout and the application. Now run this in `emacs`: `M-x nrepl` and enter the local machine for 'Host' and '9999' for 'Port'. Now you have a REPL in `emacs` which is connected to your running app. As you will see in a bit, this is neat-o torpedo.
 
-To start evaluating definitions within our app's namespace, enter this command into the REPL: `(in-ns 'org.stuff.events.main)` Then, evaluate the `ns` form in the source file by moving the cursor after the closing parenthesis of the `ns` form and hitting `C-x C-e`.
+To enter the namespace, type this command into the REPL: `(in-ns 'org.stuff.events.main)` To start evaluating definitions within our app's namespace, evaluate the `ns` form in the source file by entering the `emacs` command `C-c C-n` (or by moving the cursor after the closing parenthesis of the `ns` form and hitting `C-x C-e`).
 
 Let's now code a definition for the layout of the app. The `make-ui` macro takes in a vector of elements which will be transformed into XML ([learn more here](https://github.com/alexander-yakushev/neko/wiki/User-interface)). This structure can be anonymously passed into `make-ui`, but let's give it a named definition:
 
@@ -109,7 +113,7 @@ Evaluate this form. Then evaluate the `on-ui` form to update the app. (From now 
 The app doesn't really do anything right now. Let's add attributes to our layout elements for functionality.
 
 ```clojure
-(declare android.widget.LinearLayout mylayout)
+(declare ^android.widget.LinearLayout mylayout)
 
 (def main-layout [:linear-layout {:orientation :vertical,
      		 		  :id-holder :true
@@ -128,14 +132,15 @@ With these additions, we can now access the values of these elements using `.get
 [pic here]
 
 ```clojure
-=> (.getTag mylayout)
-
-=> (str (.getText (::name (.getTag mylayout))))
-
-=> (str (.getText (::location (.getTag mylayout))))
+org.stuff.events.main> (.getTag mylayout)
+{:org.stuff.events.main/location #<EditText android.widget.EditText@42315c30>, :org.stuff.events.main/name #<EditText android.widget.EditText@42206a18>}
+org.stuff.events.main> (str (.getText (::name (.getTag mylayout))))
+"Party"
+org.stuff.events.main> (str (.getText (::location (.getTag mylayout))))
+"My Place"
 ```
 
-Let's write a helper function for our convenience:
+Note that the return value for the widget objects will probably be different for you. Now let's write a helper function for our convenience:
 
 ```clojure
 (defn get-elmt [elmt]
@@ -176,7 +181,7 @@ Well, we know that we need to add an event to the listing. First, let's add a ne
                                :id ::location}]
                   [:button {:text "+ Event",
                             :on-click (fn [_] (add-event))}]
-                  [:text-vew {:text @listing,
+                  [:text-view {:text @listing,
                               :id ::listing}]])
 ```
 
@@ -188,21 +193,31 @@ Before we define the callback function, let's play with the REPL and figure out 
 [pic here]
 
 ```clojure
-=> (swap! listing str (get-elmt ::location) " - " 
-		      (get-elmt ::name) "\n")
+org.stuff.events.main> (swap! listing str (get-elmt ::location) " - " 
+		       (get-elmt ::name) "\n")
+"Your Place - Party\n"
 ```
 
-Next, we want to update the ui with the listing. 
+Next, we want to update the ui with the listing. We can use the `config` macrio in `neko.ui` to achieve this. Let's update the `ns` form at the top of the source:
 
 ```clojure
-=> (on-ui (.setText (::listing (.getTag mylayout)) @listing))
+...
+[neko.ui :only [make-ui config]]
+...
+```
+
+Run `C-c C-n` to evaluate the `ns` form then enter this into the REPL:
+
+
+```clojure
+org.stuff.events.main> (on-ui (config (::listing (.getTag mylayout)) :text @listing))
 ```
 
 Let's write another helper function for setting the text of our elements.
 
 ```clojure
 (defn set-elmt [elmt s]
-  (on-ui (.setText (elmt (.getTag mylayout)) s)))
+  (on-ui (config (elmt (.getTag mylayout)) :text s)))
 ```
 
 Let's have our callback function perform these two tasks:
