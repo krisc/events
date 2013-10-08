@@ -33,7 +33,7 @@ Now that you have been **forewarned**, let's begin.
 
 Let's make a simple event listing app. This will not be a full-fledged calendar app, but rather a simple tool to pencil in events and have them sorted in chronological order. I have a text file on my desktop that I use to pencil in dates for gigs, practices, and other events.
 
-![text document of event listing](http://i.imgur.com/pdjVQsD.png?1)
+![text document of event listing](https://github.com/krisc/events/blob/master/desktop.png)
 
 Our app will be based off of this simple idea.
 
