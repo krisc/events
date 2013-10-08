@@ -803,9 +803,9 @@ Questions? Suggestions? Feel free to get in touch and [follow me on Twitter](htt
 >Bigger is just something you have to live with in Java. Growth is a fact of life. Java is like a variant of the game of Tetris in which none of the pieces can fill gaps created by the other pieces, so all you can do is pile them up endlessly.
 
 
-<sup>2</sup><a name="2"></a> http://www.niemanlab.org/2011/11/in-praise-of-impractical-programming/
-
-<sup>3</sup><a name="3"></a> If you don't yet know Clojure, I recommend Joy of Clojure and watching Rich Hickey's talks. Despite it's power and simplicity, I wouldn't recommend Clojure to novice programmers. One should probably be fluent in at least two or three other languages before taking on Clojure. If you really want to dive into the rabbit hole, I recommend SICP before jumping into Clojure. Learning the Clojure way is quite a journey and deserves it's own blog post.
+<sup>2</sup><a name="2"></a>In ["In praise of impractical programming"](http://www.niemanlab.org/2011/11/in-praise-of-impractical-programming/) Jacob Harris writes:
+>Learning to program is an important skill; learning how to be a programmer requires a far different type of course. For that, I have to thank a truly impractical introduction
+<sup>3</sup><a name="3"></a> If you don't yet know Clojure, I recommend [Joy of Clojure](http://joyofclojure.com/) and watching Rich Hickey's [talks](http://thechangelog.com/rich-hickeys-greatest-hits/). Despite it's power and simplicity, I wouldn't recommend Clojure to novice programmers. One should probably be fluent in at least two or three other languages before taking on Clojure. If you really want to dive into the rabbit hole, I recommend SICP (these [lectures](http://www.youtube.com/watch?v=2Op3QLzMgSY&list=PL8FE88AA54363BC46) were filmed in 1986 but still relevant) before jumping into Clojure. Learning the Clojure way is quite a journey and deserves it's own blog post.
 
 <sup>4</sup><a name="4"></a> Use mutable state at your own judgment. Learn more about immutability, state, and identity here.
 
