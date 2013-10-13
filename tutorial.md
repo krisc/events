@@ -1,5 +1,5 @@
 #Android App Development with Clojure:<br>An Interactive Tutorial <img src="forever-in-love.png" align="top" alt="forever in love">
-by Kris Calabio
+by [Kris Calabio](https://github.com/krisc) ([@zangderak](https://twitter.com/zangderak))
 
 ###Is there a better way?
 
