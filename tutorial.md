@@ -796,7 +796,7 @@ Then evaluate the `ns` form to get back into your running app's namespace. The i
 ###Conclusion
 The tools available for Android development are still young. Needless to say, you will probably run into some issues and bugs along the way. If you are serious about pursuing this bleeding edge stuff, get connected with the maintainers of these tools. Alex Yakushev in particular has been very helpful and quick to respond to me personally as I was learning how to use [lein-droid](https://github.com/clojure-android/lein-droid/issues?state=open). Phil Hagelberg (a.k.a. [technomancy](https://github.com/technomancy)) of [lein](https://github.com/technomancy/leiningen) is also pretty responsive.
 
-Questions? Comments? Feel free to get in touch and [follow me on Twitter](https://twitter.com/zangderak).
+Problems? Please [Open an issue on GitHub](https://github.com/krisc/events/issues), and I'll try my best to help you out. Other comments? Feel free to get in touch and [follow me on Twitter](https://twitter.com/zangderak).
 
 ###Notes
 1.<a name="1"></a> In ["Code's Worst Enemy"](http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html) Steve Yegge writes:
