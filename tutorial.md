@@ -479,7 +479,7 @@ Here's what our source file looks like so far:
 (def listing (mt-listing))
 
 (def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder :true,
+                                  :id-holder true,
                                   :def `mylayout}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
@@ -676,7 +676,7 @@ Here is the source code so far:
                     (format-events (second (first keyval)))))))))
 
 (def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder :true,
+                                  :id-holder true,
                                   :def `mylayout}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
