@@ -1,11 +1,12 @@
-#Android App Development with Clojure: An Interactive Tutorial
+#Android App Development with Clojure:<br>An Interactive Tutorial <img src="forever-in-love.png" align="top" alt="forever in love">
+by [Kris Calabio](https://github.com/krisc) ([@zangderak](https://twitter.com/zangderak))
 
 ###Is there a better way?
 
 I've been programming in Java since I was an undergrad in college in 2006. While working a contract job in 2011-2012 in which I was hired to work with a huge mess of Java code[<sup>1</sup>](#1), I was left wondering if Java was rotting my brain. Surely, there has got to be a better way. After an impractical detour[<sup>2</sup>](#2), I decided to take on learning [Clojure](http://clojure.org/), a Lisp dialect for the JVM. After a two-year journey of hacking personal projects, Clojure is now my general programming language of choice.
 
 While learning how to write apps for [Android](http://developer.android.com/), I was back to programming in Java and again was left thinking that there has got to be a better way! I looked into developing Android apps using Clojure. Although there
-is still much room for maturation, the efforts of [Daniel Solano Gómez](http://www.youtube.com/watch?v=1NptqU3bqZE), [Alex Yakuchev](http://clojure-android.blogspot.com/2013/06/state-of-clojure-on-android-2013.html), and [Zach Oakes](https://nightweb.net/blog/clojure-on-android.html) show a promising future for Clojure in Android development.
+is still much room for maturation, the efforts of [Daniel Solano Gómez](http://www.youtube.com/watch?v=1NptqU3bqZE), [Alex Yakushev](http://clojure-android.blogspot.com/2013/06/state-of-clojure-on-android-2013.html), and [Zach Oakes](https://nightweb.net/blog/clojure-on-android.html) show a promising future for Clojure in Android development.
 
 ### Prerequisites
 
@@ -27,7 +28,7 @@ neko 3.0.0-preview1
 clojure-complete 0.3.0-SNAPSHOT
 ```
 
-Now that you have been **forewarned**, let's begin.
+Now that you have been **forewarned**, let's begin. If you run into problems, please [open an issue on GitHub](https://github.com/krisc/events/issues), and I'll try my best to help you out.
 
 ### What are we making?
 
@@ -141,7 +142,7 @@ org.stuff.events.main> (.getTag mylayout)
 org.stuff.events.main> (str (.getText (::name (.getTag mylayout))))
 "Party"
 org.stuff.events.main> (str (.getText (::location (.getTag mylayout))))
-"My Place"
+"Your Place"
 ```
 
 Note that the return value for the widget objects will probably be different for you. Now let's write a helper function for our convenience:
@@ -478,7 +479,7 @@ Here's what our source file looks like so far:
 (def listing (mt-listing))
 
 (def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder :true,
+                                  :id-holder true,
                                   :def `mylayout}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
@@ -675,7 +676,7 @@ Here is the source code so far:
                     (format-events (second (first keyval)))))))))
 
 (def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder :true,
+                                  :id-holder true,
                                   :def `mylayout}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
@@ -793,19 +794,24 @@ And in `emacs`: `M-x nrepl`, local machine for 'Host', and '9999' for 'Port'. No
 Then evaluate the `ns` form to get back into your running app's namespace. The important thing to know is that all the new code you wrote after your last `build` has to be evaluated at the REPL in order to get back to your previous state. Running `lein droid doall` at the terminal at key points of development can save you some steps whenever you lose your REPL connection.
 
 ###Conclusion
-The tools available for Android development are still young. Needless to say, you will probably run into some issues and bugs along the way. If you are serious about pursuing this bleeding edge stuff, get connected with the maintainers of these tools. Alex Yakushev in particular has been very helpful and quick to respond to me personally as I was learning how to use `lein-droid`. Phil Hagelberg (a.k.a. [technomancy](https://github.com/technomancy)) of [lein](https://github.com/technomancy/leiningen) is also pretty responsive.
+The tools available for Android development are still young. Needless to say, you will probably run into some issues and bugs along the way. If you are serious about pursuing this bleeding edge stuff, get connected with the maintainers of these tools. Alex Yakushev in particular has been very helpful and quick to respond to me personally as I was learning how to use [lein-droid](https://github.com/clojure-android/lein-droid/issues?state=open). Phil Hagelberg (a.k.a. [technomancy](https://github.com/technomancy)) of [lein](https://github.com/technomancy/leiningen) is also pretty responsive.
 
-Feel free to get in touch and [follow me on Twitter](https://twitter.com/zangderak).
+Problems? Please [open an issue on GitHub](https://github.com/krisc/events/issues), and I'll try my best to help you out. Other comments? Feel free to get in touch and [follow me on Twitter](https://twitter.com/zangderak).
 
 ###Notes
-<sup>1</sup><a name="1"></a> http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html
+1.<a name="1"></a> In ["Code's Worst Enemy"](http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html) Steve Yegge writes:
+>Bigger is just something you have to live with in Java. Growth is a fact of life. Java is like a variant of the game of Tetris in which none of the pieces can fill gaps created by the other pieces, so all you can do is pile them up endlessly.
 
-<sup>2</sup><a name="2"></a> http://www.niemanlab.org/2011/11/in-praise-of-impractical-programming/
 
-<sup>3</sup><a name="3"></a> If you don't yet know Clojure, I recommend Joy of Clojure and watching Rich Hickey's talks. Despite it's power and simplicity, I wouldn't recommend Clojure to novice programmers. One should probably be fluent in at least two or three other languages before taking on Clojure. If you really want to dive into the rabbit hole, I recommend SICP before jumping into Clojure. Learning the Clojure way is quite a journey and deserves it's own blog post.
+2.<a name="2"></a> In ["In Praise of Impractical Programming"](http://www.niemanlab.org/2011/11/in-praise-of-impractical-programming/) Jacob Harris writes:
+>Learning to program is an important skill; learning how to be a programmer requires a far different type of course. For that, I have to thank a truly impractical introduction...
 
-<sup>4</sup><a name="4"></a> Use mutable state at your own judgment. Learn more about immutability, state, and identity here.
+3.<a name="3"></a> If you don't yet know Clojure, I recommend [Joy of Clojure](http://joyofclojure.com/) and watching Rich Hickey's [talks](http://thechangelog.com/rich-hickeys-greatest-hits/). Despite it's power and simplicity, I wouldn't recommend Clojure to novice programmers. One should probably be fluent in at least two or three other languages before taking on Clojure. If you really want to dive into the rabbit hole, I recommend SICP (these [lectures](http://www.youtube.com/watch?v=2Op3QLzMgSY&list=PL8FE88AA54363BC46) were filmed in 1986 but still relevant) before jumping into Clojure. Learning the Clojure way is quite a journey and deserves it's own blog post.
 
-<sup>5</sup><a name="5"></a> For reference, this code was translated from this [page](http://developer.android.com/guide/topics/ui/controls/pickers.html#DatePicker).
+4.<a name="4"></a> Use mutable state at your own judgment. Learn more about immutability, state, and identity [here](http://clojure.org/state).
 
-<sup>6</sup><a name="6"></a> http://www.paulgraham.com/power.html
+5.<a name="5"></a> For reference, this code was translated from this [page](http://developer.android.com/guide/topics/ui/controls/pickers.html#DatePicker).
+
+6.<a name="6"></a> In ["Succinctness is Power"](http://www.paulgraham.com/power.html) Paul Graham writes:
+>If smaller source code is the purpose of high-level languages, and the power of something is how well it achieves its purpose, then the measure of the power of a programming language is how small it makes your programs.
+
