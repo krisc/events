@@ -119,7 +119,7 @@ The app doesn't really do anything right now. Let's add attributes to our layout
 (declare ^android.widget.LinearLayout mylayout)
 
 (def main-layout [:linear-layout {:orientation :vertical,
-     		 		  :id-holder :true
+     		 		  :id-holder true
                                   :def `mylayout}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
@@ -159,7 +159,7 @@ Now let's have that button do some work.
 (declare add-event)
 
 (def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder :true,
+                                  :id-holder true,
                                   :def `mylayout}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
@@ -178,7 +178,7 @@ Well, we know that we need to add an event to the listing. First, let's add a ne
 (def listing (mt-listing))
 
 (def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder :true,
+                                  :id-holder true,
                                   :def `mylayout}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
@@ -273,7 +273,7 @@ If you're coding along at home (and I hope you are!), here is what our code shou
 (def listing (mt-listing))
 
 (def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder :true,
+                                  :id-holder true,
                                   :def `mylayout}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
@@ -390,7 +390,7 @@ Calling this function creates an instance of a `date-picker` object. Let's add a
 (declare show-picker)
 
 (def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder :true,
+                                  :id-holder true,
                                   :def `mylayout}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
