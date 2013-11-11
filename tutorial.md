@@ -64,7 +64,7 @@ the `project.clj` file and change the `neko` version in `:dependencies` to
 `"3.0.0-preview1"`.
 
 If you have an actual Android device at hand, connect it to your
-computer. If not, you can setup an [emulator](http://developer.android.com/tools/devices/emulator.html). Now run `lein droid doall` at the terminal. This will build the app, install the app to you device, and open an `nREPL` server within our running app.
+computer. If not, you can setup an [emulator](http://developer.android.com/tools/devices/emulator.html). Now run `lein droid doall` at the terminal. This will build the app, install the app to your device, and open an `nREPL` server within the running app.
 
 ### Define the Layout
 
