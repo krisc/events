@@ -46,12 +46,12 @@ Alex's [Tutorial](https://github.com/clojure-android/lein-droid/wiki/Tutorial) i
 
 This is how my `~/.lein/profiles.clj` looks like:
 ```clojure
-{:user {:plugins [ [lein-droid "0.2.0-beta3"] ]
+{:user {:plugins [ [lein-droid "0.2.0-preview4"] ]
         :android {:sdk-path "/home/kris/adt-bundle-linux-x86_64-20130522/sdk/"}}}
 ```
 
 NOTE: Change the directory to reflect your own sdk's path. And if
-there is a later version of `lein-droid`, consider using that.
+there is a later version of `lein-droid`, consider using that. [UPDATE 2013-11-22: The current stable version which is `lein-droid "0.2.0"` causes problems for me. If it causes problems for you too, use `lein-droid "0.2.0-preview4"`.]
 
 Run this command at the terminal:
 
@@ -61,7 +61,7 @@ lein droid new events org.stuff.events :activity MyActivity :target-sdk 15 :app-
 
 This will create a template file structure for an Android app. Open
 the `project.clj` file and change the `neko` version in `:dependencies` to
-`"3.0.0-preview1"`.
+`"3.0.0-preview4"`. [UPDATE 2013-11-22: The current stable versionwhich is `neko "3.0.0"` causes problems for me as well. If it causes problems for you too, use `neko "3.0.0-preview4"`.]
 
 If you have an actual Android device at hand, connect it to your
 computer. If not, you can setup an [emulator](http://developer.android.com/tools/devices/emulator.html). Now run `lein droid doall` at the terminal. This will build the app, install the app to your device, and open an `nREPL` server within the running app.
