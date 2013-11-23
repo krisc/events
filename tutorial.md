@@ -14,18 +14,18 @@ This tutorial is directed towards Clojure programmers who are seeking an alterna
 
 We will be using Alex Yakushev's [lein-droid](https://github.com/clojure-android/lein-droid) tool for project management. We will also be using Alex's fork of Daniel Solano Gómez's [neko library](https://github.com/alexander-yakushev/neko/wiki) which provides function wrappers and alternatives to the Android Java API. However, neko does not replace everything as of the time of this writing and is subject to change so keep the [Android docs](http://developer.android.com/reference/packages.html) handy. There will be some Java interop in this tutorial. We will be using [emacs](http://www.gnu.org/software/emacs/) with the [nrepl] (https://github.com/clojure/tools.nrepl) plugin for this tutorial.
 
-**Be forewarned:** some tools in this setup are still very young and are in fast development. New versions may pop up as of the time of this writing (Sep 25, 2013) and may introduce breaking changes. For your information, here are the versions of the tools that I am using:
+**Be forewarned:** some tools in this setup are still very young and are in fast development. New versions may pop up as of the time of this writing (Nov 22, 2013) and may introduce breaking changes. For your information, here are the versions of the tools that I am using:
 
 ```
-Linux Mint 14 (Nadia)
-Java 1.6.0_45
-clojure-android/clojure 1.5.1-SNAPSHOT
-Leiningen 2.3.1
-lein-droid 0.2.0-beta3
-Android SDK Tools 22.0.5
+Arch Linux
+Java 1.7.0_45
+clojure-android/clojure 1.5.jb
+Leiningen 2.3.3
+lein-droid 0.2.0-preview4
+Android SDK Tools 22.3
 nrepl 0.2.0-bigstack
-neko 3.0.0-preview1
-clojure-complete 0.3.0-SNAPSHOT
+neko 3.0.0-preview4
+compliment 0.0.2
 ```
 
 Now that you have been **forewarned**, let's begin. If you run into problems, please [open an issue on GitHub](https://github.com/krisc/events/issues), and I'll try my best to help you out.
