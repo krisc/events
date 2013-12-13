@@ -11,7 +11,7 @@
   :java-source-paths ["src/java" "gen"]
   :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
   :dependencies [[org.clojure-android/clojure "1.5.1-jb"]
-                 [neko/neko "3.0.0-preview3"]]
+                 [neko/neko "3.0.0-preview4"]]
   :profiles {:dev {:dependencies [[android/tools.nrepl "0.2.0-bigstack"]
                                   [org.clojure-android/clojure-complete "0.3.0-SNAPSHOT"]]
                    :android {:aot :all-with-unused}}
