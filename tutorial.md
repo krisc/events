@@ -354,91 +354,96 @@ First, let's add some imports into our `ns` form:
            (android.app DialogFragment)))
 ```
 
-Before we continue, let's change the `defactivity` form a bit so we can access our activity outside of this form.
+Before we continue, let's change the `defactivity` form a bit so we can pass around our activity as needed. Note the use of `this`. In a moment, we will also change the definition of `main-layout` to be a function so that we can pass our activity to it. In the `make-ui` form below, we will call that function.
 
 ```clojure
 (defactivity org.stuff.events.MyActivity
+  :def a
   :on-create
   (fn [this bundle]
     (on-ui
-     (set-content-view! myActivity
-      (make-ui main-layout)))
+     (set-content-view! this
+      (make-ui (main-layout this))))
     (on-ui
      (set-elmt ::listing @listing))))
 ```
 
-Note that when the `:def` attribute is removed, we can refer to our `MyActivity` by `myActivity`. This is how we will refer to our activity in the upcoming function. Also note that re-evaluating this form may not be enough since the `:on-create` callback needs to be called. Rotating your screen will do!
+It is important to note that the `:def a` line will be ignored for the release build. You may use the `a` reference when you are debugging, but remember to remove all uses of `a` before making your release build. Also note that re-evaluating this form may not be enough since the `:on-create` callback needs to be called. Rotating your screen will do!
 
 Now we will use `proxy` to create an instance of an anonymous class:
 
 ```clojure
-(defn date-picker []
+(defn date-picker [activity]
   (proxy [DialogFragment DatePickerDialog$OnDateSetListener] []
     (onCreateDialog [savedInstanceState]
       (let [c (Calendar/getInstance)
             year (.get c Calendar/YEAR)
             month (.get c Calendar/MONTH)
             day (.get c Calendar/DAY_OF_MONTH)]
-        (DatePickerDialog. myActivity this year month day)))
+        (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day])))
 ```
 
-Calling this function creates an instance of a `date-picker` object. Let's add a new button to the layout that will create then show this dialog.
+We will finish the `onDateSet` listener code in a bit. Calling this function creates an instance of a `date-picker` object. Let's change the definition of `main-layout` now to be a function and add a new button to the layout that will create then show this dialog.
 
 ```clojure
 (declare date-picker)
 (declare show-picker)
 
-(def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder true,
-                                  :def `mylayout}
-                  [:edit-text {:hint "Event name",
-                               :id ::name}]
-                  [:edit-text {:hint "Event location",
-                               :id ::location}]
-                  [:button {:text "...",
-                            :on-click (fn [_] (show-picker (date-picker)))}]
-                  [:button {:text "+ Event",
-                            :on-click (fn [_](add-event))}]
-                  [:text-view {:text @listing,
-                              :id ::listing}]])
+(defn main-layout [activity]
+  [:linear-layout {:orientation :vertical,
+                   :id-holder :true,
+                   :def `mylayout}
+   [:edit-text {:hint "Event name",
+                :id ::name}]
+   [:edit-text {:hint "Event location",
+                :id ::location}]
+   [:button {:text "...",
+             :on-click (fn [_] (show-picker activity 
+                                            (date-picker activity)))}]
+   [:button {:text "+ Event",
+             :on-click (fn [_](add-event))}]
+   [:text-view {:text @listing,
+                :id ::listing}]])
 
-(defn show-picker [dp]
-  (. dp show (. myActivity getFragmentManager) "datePicker"))
+(defn show-picker [activity dp]
+  (. dp show (. activity getFragmentManager) "datePicker"))
 ```
 
 Update your `ui` and try hitting that `...` button. Now let's have that dialog update a `:text-view` with that chosen date.
 
 ```clojure
-(def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder :true,
-                                  :def `mylayout}
-                  [:edit-text {:hint "Event name",
-                               :id ::name}]
-                  [:edit-text {:hint "Event location",
-                               :id ::location}]
-                  [:linear-layout {:orientation :horizontal}
-                   [:text-view {:hint "Event date",
-                                :id ::date}]
-                   [:button {:text "...",
-                             :on-click (fn [_] (show-picker (date-picker)))}]]
-                  [:button {:text "+ Event",
-                            :on-click (fn [_](add-event))}]
-                  [:text-view {:text @listing,
-                              :id ::listing}]])
+(defn main-layout [activity]
+  [:linear-layout {:orientation :vertical,
+                   :id-holder :true,
+                   :def `mylayout}
+   [:edit-text {:hint "Event name",
+                :id ::name}]
+   [:edit-text {:hint "Event location",
+                :id ::location}]
+   [:linear-layout {:orientation :horizontal}
+    [:text-view {:hint "Event date",
+                 :id ::date}]
+    [:button {:text "...",
+              :on-click (fn [_] (show-picker activity
+                                            (date-picker activity)))}]]
+   [:button {:text "+ Event",
+             :on-click (fn [_](add-event))}]
+   [:text-view {:text @listing,
+                :id ::listing}]])
 ```
 
 Note that the new `:text-view` element and the button that spawns the picker are inside a nested `:linear-layout` element. Our date string will have the YYYYMMDD format. Now let's fill out that listener function in our proxy object.
 
 ```clojure
-(defn date-picker []
+(defn date-picker [activity]
   (proxy [DialogFragment DatePickerDialog$OnDateSetListener] []
     (onCreateDialog [savedInstanceState]
       (let [c (Calendar/getInstance)
             year (.get c Calendar/YEAR)
             month (.get c Calendar/MONTH)
             day (.get c Calendar/DAY_OF_MONTH)]
-        (DatePickerDialog. myActivity this year month day)))
+        (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
        (on-ui (.setText (::date (.getTag mylayout))
                         (str year
@@ -478,22 +483,24 @@ Here's what our source file looks like so far:
 (defn mt-listing [] (atom ""))
 (def listing (mt-listing))
 
-(def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder true,
-                                  :def `mylayout}
-                  [:edit-text {:hint "Event name",
-                               :id ::name}]
-                  [:edit-text {:hint "Event location",
-                               :id ::location}]
-                  [:linear-layout {:orientation :horizontal}
-                   [:text-view {:hint "Event date",
-                                :id ::date}]
-                   [:button {:text "...",
-                             :on-click (fn [_] (show-picker (date-picker)))}]]
-                  [:button {:text "+ Event",
-                            :on-click (fn [_](add-event))}]
-                  [:text-view {:text @listing,
-                              :id ::listing}]])
+(defn main-layout [activity]
+  [:linear-layout {:orientation :vertical,
+                   :id-holder :true,
+                   :def `mylayout}
+   [:edit-text {:hint "Event name",
+                :id ::name}]
+   [:edit-text {:hint "Event location",
+                :id ::location}]
+   [:linear-layout {:orientation :horizontal}
+    [:text-view {:hint "Event date",
+                 :id ::date}]
+    [:button {:text "...",
+              :on-click (fn [_] (show-picker activity
+                                            (date-picker activity)))}]]
+   [:button {:text "+ Event",
+             :on-click (fn [_](add-event))}]
+   [:text-view {:text @listing,
+                :id ::listing}]])
 
 (defn get-elmt [elmt]
   (str (.getText (elmt (.getTag mylayout)))))
@@ -514,30 +521,31 @@ Here's what our source file looks like so far:
   (update-ui))
 
 (defactivity org.stuff.events.MyActivity
+  :def a
   :on-create
   (fn [this bundle]
     (on-ui
-     (set-content-view! myActivity
-      (make-ui main-layout)))
+     (set-content-view! this
+      (make-ui (main-layout this))))
     (on-ui
      (set-elmt ::listing @listing))))
 
-(defn date-picker []
+(defn date-picker [activity]
   (proxy [DialogFragment DatePickerDialog$OnDateSetListener] []
     (onCreateDialog [savedInstanceState]
       (let [c (Calendar/getInstance)
             year (.get c Calendar/YEAR)
             month (.get c Calendar/MONTH)
             day (.get c Calendar/DAY_OF_MONTH)]
-        (DatePickerDialog. myActivity this year month day)))
+        (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
        (on-ui (.setText (::date (.getTag mylayout))
                         (str year
                              (format "%02d" (inc month))
                              (format "%02d" day)))))))
 
-(defn show-picker [dp]
-  (. dp show (. myActivity getFragmentManager) "datePicker"))
+(defn show-picker [activity dp]
+  (. dp show (. activity getFragmentManager) "datePicker"))
 ```
 
 ###Sorting and Formatting the Listing
@@ -599,22 +607,24 @@ looking like a monstrosity, let's split it into two functions: one to loop over 
 Let's replace all occurrences in our code that assumes `@listing` to be a string with `(format-listing @listing)`. In our layout:
 
 ```clojure
-(def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder :true,
-                                  :def `mylayout}
-                  [:edit-text {:hint "Event name",
-                               :id ::name}]
-                  [:edit-text {:hint "Event location",
-                               :id ::location}]
-                  [:linear-layout {:orientation :horizontal}
-                   [:text-view {:hint "Event date",
-                                :id ::date}]
-                   [:button {:text "...",
-                             :on-click (fn [_] (show-picker (date-picker)))}]]
-                  [:button {:text "+ Event",
-                            :on-click (fn [_](add-event))}]
-                  [:text-view {:text (format-listing @listing),
-                              :id ::listing}]])
+(defn main-layout [activity]
+  [:linear-layout {:orientation :vertical,
+                   :id-holder :true,
+                   :def `mylayout}
+   [:edit-text {:hint "Event name",
+                :id ::name}]
+   [:edit-text {:hint "Event location",
+                :id ::location}]
+   [:linear-layout {:orientation :horizontal}
+    [:text-view {:hint "Event date",
+                 :id ::date}]
+    [:button {:text "...",
+              :on-click (fn [_] (show-picker activity
+                                            (date-picker activity)))}]]
+   [:button {:text "+ Event",
+             :on-click (fn [_](add-event))}]
+   [:text-view {:text (format-listing @listing),
+                :id ::listing}]])
 ```
 
 And in `update-ui`:
@@ -675,22 +685,24 @@ Here is the source code so far:
                     ; loop through events within dates
                     (format-events (second (first keyval)))))))))
 
-(def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder true,
-                                  :def `mylayout}
-                  [:edit-text {:hint "Event name",
-                               :id ::name}]
-                  [:edit-text {:hint "Event location",
-                               :id ::location}]
-                  [:linear-layout {:orientation :horizontal}
-                   [:text-view {:hint "Event date",
-                                :id ::date}]
-                   [:button {:text "...",
-                             :on-click (fn [_] (show-picker (date-picker)))}]]
-                  [:button {:text "+ Event",
-                            :on-click (fn [_](add-event))}]
-                  [:text-view {:text (format-listing @listing),
-                              :id ::listing}]])
+(defn main-layout [activity]
+  [:linear-layout {:orientation :vertical,
+                   :id-holder :true,
+                   :def `mylayout}
+   [:edit-text {:hint "Event name",
+                :id ::name}]
+   [:edit-text {:hint "Event location",
+                :id ::location}]
+   [:linear-layout {:orientation :horizontal}
+    [:text-view {:hint "Event date",
+                 :id ::date}]
+    [:button {:text "...",
+              :on-click (fn [_] (show-picker activity
+                                            (date-picker activity)))}]]
+   [:button {:text "+ Event",
+             :on-click (fn [_](add-event))}]
+   [:text-view {:text (format-listing @listing),
+                :id ::listing}]])
 
 (defn get-elmt [elmt]
   (str (.getText (elmt (.getTag mylayout)))))
@@ -720,30 +732,31 @@ Here is the source code so far:
       (update-ui))))
 
 (defactivity org.stuff.events.MyActivity
+  :def a
   :on-create
   (fn [this bundle]
     (on-ui
-     (set-content-view! myActivity
-      (make-ui main-layout)))
+     (set-content-view! this
+      (make-ui (main-layout this))))
     (on-ui
-     (set-elmt ::listing (format-listing @listing)))))
+     (set-elmt ::listing @listing))))
 
-(defn date-picker []
+(defn date-picker [activity]
   (proxy [DialogFragment DatePickerDialog$OnDateSetListener] []
     (onCreateDialog [savedInstanceState]
       (let [c (Calendar/getInstance)
             year (.get c Calendar/YEAR)
             month (.get c Calendar/MONTH)
             day (.get c Calendar/DAY_OF_MONTH)]
-        (DatePickerDialog. myActivity this year month day)))
+        (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
        (on-ui (.setText (::date (.getTag mylayout))
                         (str year
                              (format "%02d" (inc month))
                              (format "%02d" day)))))))
 
-(defn show-picker [dp]
-  (. dp show (. myActivity getFragmentManager) "datePicker"))
+(defn show-picker [activity dp]
+  (. dp show (. activity getFragmentManager) "datePicker"))
 ```
 
 This is a bit over 100 lines of code. When I first attempted to write this app using Java, I was well over 1000 lines and didn't even have all this functionality before I gave up. If succinctness really is power[<sup>6</sup>](#6), then I'm never looking back.
