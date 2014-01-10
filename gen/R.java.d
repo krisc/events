@@ -9,10 +9,4 @@
 /home/kris/src/events/res/drawable-hdpi/splash_hands.png \
 /home/kris/src/events/res/drawable-hdpi/splash_droid.png \
 /home/kris/src/events/res/drawable/splash_background.xml \
-/home/kris/src/events/target/res/drawable-ldpi/ic_launcher.png \
-/home/kris/src/events/target/res/drawable-mdpi/ic_launcher.png \
-/home/kris/src/events/target/res/drawable-hdpi/splash_circle.png \
-/home/kris/src/events/target/res/drawable-hdpi/ic_launcher.png \
-/home/kris/src/events/target/res/drawable-hdpi/splash_hands.png \
-/home/kris/src/events/target/res/drawable-hdpi/splash_droid.png \
 /home/kris/src/events/AndroidManifest.xml \

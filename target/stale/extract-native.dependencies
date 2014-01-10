@@ -1,1 +1,0 @@
-([:dependencies ([org.clojure-android/clojure "1.5.1-jb"] [neko/neko "3.0.0-preview4"] [org.clojure/clojure "1.5.1"])])
