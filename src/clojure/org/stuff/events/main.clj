@@ -41,22 +41,24 @@
                     ; loop through events within dates
                     (format-events (second (first keyval)))))))))
 
-(def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder :true,
-                                  :def `mylayout}
-                  [:edit-text {:hint "Event name",
-                               :id ::name}]
-                  [:edit-text {:hint "Event location",
-                               :id ::location}]
-                  [:linear-layout {:orientation :horizontal}
-                   [:text-view {:hint "Event date",
-                                :id ::date}]
-                   [:button {:text "...",
-                             :on-click (fn [_] (show-picker (date-picker)))}]]
-                  [:button {:text "+ Event",
-                            :on-click (fn [_](add-event))}]
-                  [:text-view {:text (format-listing @listing),
-                              :id ::listing}]])
+(defn main-layout [activity]
+  [:linear-layout {:orientation :vertical,
+                   :id-holder :true,
+                   :def `mylayout}
+   [:edit-text {:hint "Event name",
+                :id ::name}]
+   [:edit-text {:hint "Event location",
+                :id ::location}]
+   [:linear-layout {:orientation :horizontal}
+    [:text-view {:hint "Event date",
+                 :id ::date}]
+    [:button {:text "...",
+              :on-click (fn [_] (show-picker activity 
+                                             (date-picker activity)))}]]
+   [:button {:text "+ Event",
+             :on-click (fn [_](add-event))}]
+   [:text-view {:text (format-listing @listing),
+                :id ::listing}]])
 
 (defn get-elmt [elmt]
   (str (.getText (elmt (.getTag mylayout)))))
@@ -86,27 +88,28 @@
       (update-ui))))
 
 (defactivity org.stuff.events.MyActivity
+  :def a ; will be ignored in release mode
   :on-create
   (fn [this bundle]
     (on-ui
-     (set-content-view! myActivity
-      (make-ui main-layout)))
+     (set-content-view! this
+      (make-ui (main-layout this))))
     (on-ui
      (set-elmt ::listing (format-listing @listing)))))
 
-(defn date-picker []
+(defn date-picker [activity]
   (proxy [DialogFragment DatePickerDialog$OnDateSetListener] []
     (onCreateDialog [savedInstanceState]
       (let [c (Calendar/getInstance)
             year (.get c Calendar/YEAR)
             month (.get c Calendar/MONTH)
             day (.get c Calendar/DAY_OF_MONTH)]
-        (DatePickerDialog. myActivity this year month day)))
+        (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
        (on-ui (.setText (::date (.getTag mylayout))
                         (str year
                              (format "%02d" (inc month))
                              (format "%02d" day)))))))
 
-(defn show-picker [dp]
-  (. dp show (. myActivity getFragmentManager) "datePicker"))
+(defn show-picker [activity dp]
+  (. dp show (. activity getFragmentManager) "datePicker"))
