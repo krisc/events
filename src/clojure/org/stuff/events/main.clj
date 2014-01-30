@@ -65,14 +65,7 @@
                    (read-string (get-elmt ::date))
                    (catch RuntimeException e "Date string is empty!"))]
     (when (number? date-key)
-      (if (some #{date-key} (keys @listing))
-        ; add to existing date
-        (swap! listing assoc date-key
-               (conj (@listing date-key)
-                     [(get-elmt ::location) (get-elmt ::name)]))
-        ; add new date
-        (swap! listing assoc date-key
-               [[(get-elmt ::location) (get-elmt ::name)]]))
+      (swap! listing update-in [date-key] (fnil conj []) [(get-elmt ::location) (get-elmt ::name)])
       (update-ui))))
 
 (defactivity org.stuff.events.MyActivity
