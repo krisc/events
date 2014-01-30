@@ -2,7 +2,8 @@
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
         [neko.ui :only [make-ui config]]
-        [neko.application :only [defapplication]])
+        [neko.application :only [defapplication]]
+        [clojure.string :only [join]])
   (:import (java.util Calendar)
            (android.app Activity)
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
@@ -16,19 +17,11 @@
 (defn mt-listing [] (atom (sorted-map)))
 (def listing (mt-listing))
 
-(defn format-events [e]
-  ; loop through events within dates
-  (loop [events e ret "" loop0 true]
-    (if-not events          
-      ret
-      (let [loc (first (first events))
-            name (second (first events))]
-        (recur (next events)
-               (if loop0
-                 (str ret loc " - " name "\n")
-                 ;NOTE: hard coding whitespace below
-                 (str ret "                      " loc " - " name "\n"))
-               false)))))
+(defn format-events [events]
+  (->> (map (fn [[location event]]
+              (format "%s - %s\n" location event))
+            events)
+       (join "                      ")))
 
 (defn format-listing [lst]
   ; loop through dates
