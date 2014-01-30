@@ -24,15 +24,10 @@
        (join "                      ")))
 
 (defn format-listing [lst]
-  ; loop through dates
-  (loop [keyval (seq lst) ret ""]
-    (if-not keyval
-      ret
-      (let [date (first (first keyval))]
-        (recur (next keyval) 
-               (str ret date " - " 
-                    ; loop through events within dates
-                    (format-events (second (first keyval)))))))))
+  (->> (map (fn [[date events]]
+              (format "%s - %s" date (format-events events)))
+            lst)
+       join))
 
 (defn main-layout [activity]
   [:linear-layout {:orientation :vertical,
