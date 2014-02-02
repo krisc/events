@@ -575,33 +575,36 @@ We will now make a huge change to the `add-event` function. Are you ready? Let's
 ```
 
 Since our listing `atom` no longer references a string, we need to format our map. Since our data structure contains a vector of vectors, we will implement this using nested loops. To prevent this code from
-looking like a monstrosity, let's split it into two functions: one to loop over the dates and another to loop over the events within each date. Here we go.
+looking like a monstrosity, let's split it into two functions: one to loop over the dates and another to loop over the events within each date. Here we go. First, let's add a line to our namespace declaration so we can use `clojure.string`'s `join` function:
 
 ```clojure
-(defn format-events [e]
-  ; loop through events within dates
-  (loop [events e ret "" loop0 true]
-    (if-not events          
-      ret
-      (let [loc (first (first events))
-            name (second (first events))]
-        (recur (next events)
-               (if loop0
-                 (str ret loc " - " name "\n")
-                 ;NOTE: hard coding whitespace below
-                 (str ret "                      " loc " - " name "\n"))
-               false)))))
+(ns org.stuff.events.main
+  (:use [neko.activity :only [defactivity set-content-view!]]
+        [neko.threading :only [on-ui]]
+        [neko.ui :only [make-ui]]
+        [neko.application :only [defapplication]]
+        [clojure.string :only [join]])
+  (:import (java.util Calendar)
+           (android.view View)
+           (android.app Activity)
+           (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
+           (android.app DialogFragment)))
+```
 
+Now let's write our formatting functions: [Special thanks to GitHubber juergenhoetzel for cleaning up my monstrous code and making it more Clojure-y]
+
+```clojure
+(defn format-events [events]
+  (->> (map (fn [[location event]]
+              (format "%s - %s\n" location event))
+            events)
+       (join "                      ")))
+ 
 (defn format-listing [lst]
-  ; loop through dates
-  (loop [keyval (seq lst) ret ""]
-    (if-not keyval
-      ret
-      (let [date (first (first keyval))]
-        (recur (next keyval) 
-               (str ret date " - " 
-                    ; loop through events within dates
-                    (format-events (second (first keyval)))))))))
+  (->> (map (fn [[date events]]
+               (format "%s - %s" date (format-events events)))
+             lst)
+       join))
 ```
 
 Let's replace all occurrences in our code that assumes `@listing` to be a string with `(format-listing @listing)`. In our layout:
@@ -646,8 +649,10 @@ Here is the source code so far:
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
         [neko.ui :only [make-ui]]
-        [neko.application :only [defapplication]])
+        [neko.application :only [defapplication]]
+        [clojure.string :only [join]])
   (:import (java.util Calendar)
+           (android.view View)
            (android.app Activity)
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
            (android.app DialogFragment)))
@@ -660,30 +665,17 @@ Here is the source code so far:
 (defn mt-listing [] (atom (sorted-map)))
 (def listing (mt-listing))
 
-(defn format-events [e]
-  ; loop through events within dates
-  (loop [events e ret "" loop0 true]
-    (if-not events          
-      ret
-      (let [loc (first (first events))
-            name (second (first events))]
-        (recur (next events)
-               (if loop0
-                 (str ret loc " - " name "\n")
-                 ;NOTE: hard coding whitespace below
-                 (str ret "                      " loc " - " name "\n"))
-               false)))))
-
+(defn format-events [events]
+  (->> (map (fn [[location event]]
+              (format "%s - %s\n" location event))
+            events)
+       (join "                      ")))
+ 
 (defn format-listing [lst]
-  ; loop through dates
-  (loop [keyval (seq lst) ret ""]
-    (if-not keyval
-      ret
-      (let [date (first (first keyval))]
-        (recur (next keyval) 
-               (str ret date " - " 
-                    ; loop through events within dates
-                    (format-events (second (first keyval)))))))))
+  (->> (map (fn [[date events]]
+               (format "%s - %s" date (format-events events)))
+             lst)
+       join))
 
 (defn main-layout [activity]
   [:linear-layout {:orientation :vertical,
