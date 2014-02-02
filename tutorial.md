@@ -574,8 +574,8 @@ We will now make a huge change to the `add-event` function. Are you ready? Let's
       (update-ui))))
 ```
 
-Since our listing `atom` no longer references a string, we need to format our map. Since our data structure contains a vector of vectors, we will implement this using nested loops. To prevent this code from
-looking like a monstrosity, let's split it into two functions: one to loop over the dates and another to loop over the events within each date. Here we go. First, let's add a line to our namespace declaration so we can use `clojure.string`'s `join` function:
+Since our listing `atom` no longer references a string, we need to format our map. Since our data structure contains a vector of vectors, we will implement this using two functions to prevent this code from
+looking too ugly: one to format the dates and one to format the events within each date. First, let's add a line to our `ns` form so we can use `clojure.string`'s `join` function:
 
 ```clojure
 (ns org.stuff.events.main
@@ -591,7 +591,7 @@ looking like a monstrosity, let's split it into two functions: one to loop over 
            (android.app DialogFragment)))
 ```
 
-Now let's write our formatting functions: [Special thanks to GitHubber juergenhoetzel for cleaning up my monstrous code and making it more Clojure-y]
+Now let's write our formatting functions. Special thanks to GitHubber [juergenhoetzel](https://github.com/juergenhoetzel) for cleaning up my previously imperative (and monstrous) code and making it more Clojure-y.
 
 ```clojure
 (defn format-events [events]
