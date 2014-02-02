@@ -555,7 +555,7 @@ Now that we have dates, we can sort our listing. Let's change our `mt-listing` c
 (defn mt-listing [] (atom (sorted-map)))
 ```
 
-We will now make a huge change to the `add-event` function. Are you ready? Let's leave formatting out of this and only deal with updating our data structure. The keys to our map will be an integer representing the date. Each date should be able to hold multiple events, so the value of the key will be a vector of location and name vectors. 
+We will now make a major change to the `add-event` function. Are you ready? Let's leave formatting out of this and only deal with updating our data structure. The keys to our map will be an integer representing the date. Each date should be able to hold multiple events, so the value of the key will be a vector of location and name vectors[*](#*).
 
 ```clojure
 (defn add-event []
@@ -563,14 +563,7 @@ We will now make a huge change to the `add-event` function. Are you ready? Let's
                    (read-string (get-elmt ::date))
                    (catch RuntimeException e "Date string is empty!"))]
     (when (number? date-key)
-      (if (some #{date-key} (keys @listing))
-        ; add to existing date
-        (swap! listing assoc date-key
-               (conj (@listing date-key)
-                     [(get-elmt ::location) (get-elmt ::name)]))
-        ; add new date
-        (swap! listing assoc date-key
-               [[(get-elmt ::location) (get-elmt ::name)]]))
+      (swap! listing update-in [date-key] (fnil conj []) [(get-elmt ::location) (get-elmt ::name)])
       (update-ui))))
 ```
 
@@ -591,7 +584,7 @@ looking too ugly: one to format the dates and one to format the events within ea
            (android.app DialogFragment)))
 ```
 
-Now let's write our formatting functions. Special thanks to GitHubber [juergenhoetzel](https://github.com/juergenhoetzel) for cleaning up my previously imperative (and monstrous) code and making it more Clojure-y.
+Now let's write our formatting functions[*](#*):
 
 ```clojure
 (defn format-events [events]
@@ -713,14 +706,7 @@ Here is the source code so far:
                    (read-string (get-elmt ::date))
                    (catch RuntimeException e "Date string is empty!"))]
     (when (number? date-key)
-      (if (some #{date-key} (keys @listing))
-        ; add to existing date
-        (swap! listing assoc date-key
-               (conj (@listing date-key)
-                     [(get-elmt ::location) (get-elmt ::name)]))
-        ; add new date
-        (swap! listing assoc date-key
-               [[(get-elmt ::location) (get-elmt ::name)]]))
+      (swap! listing update-in [date-key] (fnil conj []) [(get-elmt ::location) (get-elmt ::name)])
       (update-ui))))
 
 (defactivity org.stuff.events.MyActivity
@@ -804,6 +790,9 @@ The tools available for Android development are still young. Needless to say, yo
 Problems? Please [open an issue on GitHub](https://github.com/krisc/events/issues), and I'll try my best to help you out. Other comments? Feel free to get in touch and [follow me on Twitter](https://twitter.com/zangderak).
 
 ###Notes
+
+* <a name="*"></a> Special thanks to GitHubber [juergenhoetzel](https://github.com/juergenhoetzel) for cleaning up my previously imperative (and monstrous) code and making it more Clojure-y.
+
 1.<a name="1"></a> In ["Code's Worst Enemy"](http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html) Steve Yegge writes:
 >Bigger is just something you have to live with in Java. Growth is a fact of life. Java is like a variant of the game of Tetris in which none of the pieces can fill gaps created by the other pieces, so all you can do is pile them up endlessly.
 
