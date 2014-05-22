@@ -68,7 +68,9 @@ computer. If not, you can setup an [emulator](http://developer.android.com/tools
 
 ### Define the Layout
 
-Let's open the main Clojure source file located at `./src/clojure/org/stuff/events/main.clj` in `emacs` and start defining the layout and the application. Now run this in `emacs`: `M-x nrepl` and enter the local machine for 'Host' and '9999' for 'Port'. Now you have a REPL in `emacs` which is connected to your running app. As you will see in a bit, this is neat-o torpedo.
+Let's open the main Clojure source file located at `./src/clojure/org/stuff/events/main.clj` in `emacs` and start defining the layout and the application.
+
+If you don't already have Cider installed, you can install it by running this in `emacs`: `M-x package-install cider`. Now run this in `emacs`: `M-x cider` and enter the local machine for 'Host' and '9999' for 'Port'. Now you have a REPL in `emacs` which is connected to your running app. As you will see in a bit, this is neat-o torpedo.
 
 To enter the namespace, type this command into the REPL: `(in-ns 'org.stuff.events.main)` To start evaluating definitions within our app's namespace, evaluate the `ns` form in the source file by entering the `emacs` command `C-c C-n` (or by moving the cursor after the closing parenthesis of the `ns` form and hitting `C-x C-e`).
 
@@ -98,7 +100,7 @@ To demonstrate the power of REPL driven development, move your cursor after the 
 
 ![screen 1](screen1.png)
 
-After you have finished geeking out on how cool what just happened was, let's add a button to the layout. Our `def` form for `main-layout` should now look like this:
+And just like that, the layout has changed. After you have finished geeking out on how cool what just happened was, let's add a button to the layout. Our `def` form for `main-layout` should now look like this:
 
 ```clojure
 (def main-layout [:linear-layout {:orientation :vertical}
@@ -171,11 +173,10 @@ Now let's have that button do some work.
 
 We added an `:on-click` attribute to our `:button` element whose value is a callback function. Note the forward declaration for that callback function.
 
-Well, we know that we need to add an event to the listing. First, let's add a new element to the layout that will contain the listing. We will use an atom[<sup>4</sup>](#4) to hold the current state of the listing.
+Well, we know that we need to add an event to the listing. First, let's add a new element to the layout that will contain the listing. We will also create an atom[<sup>4</sup>](#4) to hold the current state of the listing.
 
 ```clojure
-(defn mt-listing [] (atom ""))
-(def listing (mt-listing))
+(def listing (atom ""))
 
 (def main-layout [:linear-layout {:orientation :vertical,
                                   :id-holder true,
@@ -190,8 +191,7 @@ Well, we know that we need to add an event to the listing. First, let's add a ne
                               :id ::listing}]])
 ```
 
-Here, we have a constructor which returns a new atom (an empty string). This enables us to have multiple listing objects to work with if we want to. In this tutorial, we will have one listing defined by
-`(def listing (mt-listing))`. The value of the listing atom is used for the :text attribute of the newly added :text-view element.
+The value of the listing atom is used for the :text attribute of the newly added :text-view element.
 
 Before we define the callback function, let's play with the REPL and figure out what we actually want to do when the user hits that button. First, we want to update the listing atom with the contents of the `:edit-text` fields. Enter an event in the running app then run this in the REPL:
 
@@ -209,7 +209,7 @@ Next, we want to update the ui with the listing. We can use the `config` macro i
 ...
 ```
 
-Run `C-c C-n` to evaluate the `ns` form then enter this into the REPL:
+Run `C-c C-n` to evaluate the `ns` form then evaluate that `on-ui` form in the `defactivity`. Next, enter this into the REPL:
 
 
 ```clojure
@@ -236,7 +236,7 @@ Now try hitting that button. Cool, huh?
 
 ![screen 5](screen5.png)
 
-If you need to clear your listing, just run `(def listing (mt-listing))`.
+If you need to clear your listing, just run `(def listing (atom ""))`.
 
 Hitting the button should also clear the edit fields. Let's write a function to take care of all that.
 
@@ -263,14 +263,12 @@ If you're coding along at home (and I hope you are!), here is what our code shou
 (ns org.stuff.events.main
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui]]
-        [neko.application :only [defapplication]]))
+        [neko.ui :only [make-ui]]))
 
 (declare android.widget.LinearLayout mylayout)
 (declare add-event)
 
-(defn mt-listing [] (atom ""))
-(def listing (mt-listing))
+(def listing (atom ""))
 
 (def main-layout [:linear-layout {:orientation :vertical,
                                   :id-holder true,
@@ -354,22 +352,6 @@ First, let's add some imports into our `ns` form:
            (android.app DialogFragment)))
 ```
 
-Before we continue, let's change the `defactivity` form a bit so we can pass around our activity as needed. Note the use of `this`. In a moment, we will also change the definition of `main-layout` to be a function so that we can pass our activity to it. In the `make-ui` form below, we will call that function.
-
-```clojure
-(defactivity org.stuff.events.MyActivity
-  :def a
-  :on-create
-  (fn [this bundle]
-    (on-ui
-     (set-content-view! this
-      (make-ui (main-layout this))))
-    (on-ui
-     (set-elmt ::listing @listing))))
-```
-
-It is important to note that the `:def a` line will be ignored for the release build. You may use the `a` reference when you are debugging, but remember to remove all uses of `a` before making your release build. Also note that re-evaluating this form may not be enough since the `:on-create` callback needs to be called. Rotating your screen will do!
-
 Now we will use `proxy` to create an instance of an anonymous class:
 
 ```clojure
@@ -388,8 +370,9 @@ We will finish the `onDateSet` listener code in a bit. Calling this function cre
 
 ```clojure
 (declare date-picker)
-(declare show-picker)
-
+(defn show-picker [activity dp]
+  (. dp show (. activity getFragmentManager) "datePicker"))
+  
 (defn main-layout [activity]
   [:linear-layout {:orientation :vertical,
                    :id-holder :true,
@@ -405,12 +388,26 @@ We will finish the `onDateSet` listener code in a bit. Calling this function cre
              :on-click (fn [_](add-event))}]
    [:text-view {:text @listing,
                 :id ::listing}]])
-
-(defn show-picker [activity dp]
-  (. dp show (. activity getFragmentManager) "datePicker"))
 ```
 
-Update your `ui` and try hitting that `...` button. Now let's have that dialog update a `:text-view` with that chosen date.
+Before we continue, we need change the `defactivity` form since we are now using `main-layout` as a function with the `activity` passed in. Note the use of `this`.
+
+```clojure
+(defactivity org.stuff.events.MyActivity
+  :def a
+  :on-create
+  (fn [this bundle]
+    (on-ui
+     (set-content-view! this
+      (make-ui (main-layout this))))
+    (on-ui
+     (set-elmt ::listing @listing))))
+```
+
+It is important to note that the `:def a` line will be ignored for the release build. You may use the `a` reference when you are debugging, but remember to remove all uses of `a` before making your release build. Also note that re-evaluating this form may not be enough since the `:on-create` callback needs to be called. Rotating your screen will do!
+
+
+Update your `ui` and try hitting that `...` button. Great, it works but doesn't do anything. We want that dialog update a `:text-view` with that chosen date. First we edit the layout:
 
 ```clojure
 (defn main-layout [activity]
@@ -461,16 +458,14 @@ Now try the `date-picker` again. Let's change `add-event` to include the date.
   (update-ui))
 ```
 
-Here's what our source file looks like so far:
+Go ahead and try it out. Here's what our source file looks like so far:
 
 ```clojure
 (ns org.stuff.events.main
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui]]
-        [neko.application :only [defapplication]])
+        [neko.ui :only [make-ui config]])
   (:import (java.util Calendar)
-           (android.view View)
            (android.app Activity)
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
            (android.app DialogFragment)))
@@ -478,10 +473,12 @@ Here's what our source file looks like so far:
 (declare android.widget.LinearLayout mylayout)
 (declare add-event)
 (declare date-picker)
-(declare show-picker)
 
-(defn mt-listing [] (atom ""))
-(def listing (mt-listing))
+(defn show-picker [activity dp]
+  (. dp show (. activity getFragmentManager) "datePicker"))
+
+
+(def listing (atom ""))
 
 (defn main-layout [activity]
   [:linear-layout {:orientation :vertical,
@@ -520,16 +517,6 @@ Here's what our source file looks like so far:
  	 (get-elmt ::name) "\n")
   (update-ui))
 
-(defactivity org.stuff.events.MyActivity
-  :def a
-  :on-create
-  (fn [this bundle]
-    (on-ui
-     (set-content-view! this
-      (make-ui (main-layout this))))
-    (on-ui
-     (set-elmt ::listing @listing))))
-
 (defn date-picker [activity]
   (proxy [DialogFragment DatePickerDialog$OnDateSetListener] []
     (onCreateDialog [savedInstanceState]
@@ -544,15 +531,22 @@ Here's what our source file looks like so far:
                              (format "%02d" (inc month))
                              (format "%02d" day)))))))
 
-(defn show-picker [activity dp]
-  (. dp show (. activity getFragmentManager) "datePicker"))
+(defactivity org.stuff.events.MyActivity
+  :def a
+  :on-create
+  (fn [this bundle]
+    (on-ui
+     (set-content-view! this
+      (make-ui (main-layout this))))
+    (on-ui
+     (set-elmt ::listing @listing))))
 ```
 
 ###Sorting and Formatting the Listing
-Now that we have dates, we can sort our listing. Let's change our `mt-listing` constructor to return a `sorted-map` `atom`.
+Now that we have dates, we can sort our listing. Let's change our `listing` atom to hold a `sorted-map`.
 
 ```clojure
-(defn mt-listing [] (atom (sorted-map)))
+(def listing (atom (sorted-map)))
 ```
 
 We will now make a major change to the `add-event` function. Are you ready? Let's leave formatting out of this and only deal with updating our data structure. The keys to our map will be an integer representing the date. Each date should be able to hold multiple events, so the value of the key will be a vector of location and name vectors[*](#*).
@@ -575,7 +569,6 @@ looking too ugly: one to format the dates and one to format the events within ea
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
         [neko.ui :only [make-ui]]
-        [neko.application :only [defapplication]]
         [clojure.string :only [join]])
   (:import (java.util Calendar)
            (android.view View)
@@ -584,7 +577,7 @@ looking too ugly: one to format the dates and one to format the events within ea
            (android.app DialogFragment)))
 ```
 
-Now let's write our formatting functions[*](#*):
+Now let's write our formatting functions[*](#*). Place this code somewhere before the `main-layout` definition:
 
 ```clojure
 (defn format-events [events]
@@ -633,6 +626,8 @@ And in `update-ui`:
   (set-elmt ::date ""))
 ```
 
+Depending on when you evaluated your new code and if/when you rotated your screen, your running app may have crashed and lost your REPL. Fear not, as this is expected to happen sooner or later. Just enter `lein droid doall` again at the command line.
+
 ###Succinctness is Power
 
 Here is the source code so far:
@@ -653,10 +648,10 @@ Here is the source code so far:
 (declare android.widget.LinearLayout mylayout)
 (declare add-event)
 (declare date-picker)
-(declare show-picker)
+(defn show-picker [activity dp]
+  (. dp show (. activity getFragmentManager) "datePicker"))
 
-(defn mt-listing [] (atom (sorted-map)))
-(def listing (mt-listing))
+(def listing (atom (sorted-map)))
 
 (defn format-events [events]
   (->> (map (fn [[location event]]
@@ -709,16 +704,6 @@ Here is the source code so far:
       (swap! listing update-in [date-key] (fnil conj []) [(get-elmt ::location) (get-elmt ::name)])
       (update-ui))))
 
-(defactivity org.stuff.events.MyActivity
-  :def a
-  :on-create
-  (fn [this bundle]
-    (on-ui
-     (set-content-view! this
-      (make-ui (main-layout this))))
-    (on-ui
-     (set-elmt ::listing @listing))))
-
 (defn date-picker [activity]
   (proxy [DialogFragment DatePickerDialog$OnDateSetListener] []
     (onCreateDialog [savedInstanceState]
@@ -733,8 +718,15 @@ Here is the source code so far:
                              (format "%02d" (inc month))
                              (format "%02d" day)))))))
 
-(defn show-picker [activity dp]
-  (. dp show (. activity getFragmentManager) "datePicker"))
+(defactivity org.stuff.events.MyActivity
+  :def a
+  :on-create
+  (fn [this bundle]
+    (on-ui
+     (set-content-view! this
+      (make-ui (main-layout this))))
+    (on-ui
+     (set-elmt ::listing (format-listing @listing)))))
 ```
 
 This is a bit over 100 lines of code. When I first attempted to write this app using Java, I was well over 1000 lines and didn't even have all this functionality before I gave up. If succinctness really is power[<sup>6</sup>](#6), then I'm never looking back.
