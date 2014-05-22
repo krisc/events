@@ -14,18 +14,18 @@ This tutorial is directed towards Clojure programmers who are seeking an alterna
 
 We will be using Alex Yakushev's [lein-droid](https://github.com/clojure-android/lein-droid) tool for project management. We will also be using Alex's fork of Daniel Solano Gómez's [neko library](https://github.com/alexander-yakushev/neko/wiki) which provides function wrappers and alternatives to the Android Java API. However, neko does not replace everything as of the time of this writing and is subject to change so keep the [Android docs](http://developer.android.com/reference/packages.html) handy. There will be some Java interop in this tutorial. We will be using [emacs](http://www.gnu.org/software/emacs/) with the [nrepl] (https://github.com/clojure/tools.nrepl) plugin for this tutorial.
 
-**Be forewarned:** some tools in this setup are still very young and are in fast development. New versions may pop up as of the time of this writing (Nov 22, 2013) and may introduce breaking changes. For your information, here are the versions of the tools that I am using:
+**Be forewarned:** some tools in this setup are still very young and are in fast development. New versions may pop up as of the time of this writing (May 21, 2014) and may introduce breaking changes. For your information, here are the versions of the tools that I am using:
 
 ```
 Arch Linux
-Java 1.7.0_45
-clojure-android/clojure 1.5.jb
+Java 1.7.0_51
+clojure-android/clojure 1.6.0-RC1
 Leiningen 2.3.3
-lein-droid 0.2.0-preview4
-Android SDK Tools 22.3
-nrepl 0.2.0-bigstack
-neko 3.0.0-preview4
-compliment 0.0.2
+lein-droid 0.2.3
+Android SDK Tools 22.6.3
+nrepl 0.2.3
+neko 3.0.1
+compliment 0.0.3
 ```
 
 Now that you have been **forewarned**, let's begin. If you run into problems, please [open an issue on GitHub](https://github.com/krisc/events/issues), and I'll try my best to help you out.
@@ -46,12 +46,12 @@ Alex's [Tutorial](https://github.com/clojure-android/lein-droid/wiki/Tutorial) i
 
 This is how my `~/.lein/profiles.clj` looks like:
 ```clojure
-{:user {:plugins [ [lein-droid "0.2.0-preview4"] ]
+{:user {:plugins [ [lein-droid "0.2.3"] ]
         :android {:sdk-path "/home/kris/adt-bundle-linux-x86_64-20130522/sdk/"}}}
 ```
 
 NOTE: Change the directory to reflect your own sdk's path. And if
-there is a later version of `lein-droid`, consider using that. [UPDATE 2013-11-22: The current stable version which is `lein-droid "0.2.0"` causes problems for me. If it causes problems for you too, use `lein-droid "0.2.0-preview4"`.]
+there is a later version of `lein-droid`, consider using that.
 
 Run this command at the terminal:
 
@@ -61,7 +61,7 @@ lein droid new events org.stuff.events :activity MyActivity :target-sdk 15 :app-
 
 This will create a template file structure for an Android app. Open
 the `project.clj` file and change the `neko` version in `:dependencies` to
-`"3.0.0-preview4"`. [UPDATE 2013-11-22: The current stable versionwhich is `neko "3.0.0"` causes problems for me as well. If it causes problems for you too, use `neko "3.0.0-preview4"`.]
+`"3.0.0-preview4"`.
 
 If you have an actual Android device at hand, connect it to your
 computer. If not, you can setup an [emulator](http://developer.android.com/tools/devices/emulator.html). Now run `lein droid doall` at the terminal. This will build the app, install the app to your device, and open an `nREPL` server within the running app.
