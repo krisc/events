@@ -2,7 +2,6 @@
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
         [neko.ui :only [make-ui config]]
-        [neko.application :only [defapplication]]
         [clojure.string :only [join]])
   (:import (java.util Calendar)
            (android.app Activity)
@@ -12,10 +11,11 @@
 (declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 (declare date-picker)
-(declare show-picker)
 
-(defn mt-listing [] (atom (sorted-map)))
-(def listing (mt-listing))
+(defn show-picker [activity dp]
+  (. dp show (. activity getFragmentManager) "datePicker"))
+
+(def listing (atom (sorted-map)))
 
 (defn format-events [events]
   (->> (map (fn [[location event]]
@@ -30,23 +30,25 @@
        join))
 
 (defn main-layout [activity]
-  [:linear-layout {:orientation :vertical,
-                   :id-holder :true,
+  [:linear-layout {:orientation :vertical
+                   :id-holder true
                    :def `mylayout}
-   [:edit-text {:hint "Event name",
+   [:edit-text {:hint "Event name"
                 :id ::name}]
-   [:edit-text {:hint "Event location",
+   [:edit-text {:hint "Event location"
                 :id ::location}]
    [:linear-layout {:orientation :horizontal}
     [:text-view {:hint "Event date",
                  :id ::date}]
-    [:button {:text "...",
-              :on-click (fn [_] (show-picker activity 
+    [:button {:text "..."
+              :on-click (fn [_] (show-picker activity
                                              (date-picker activity)))}]]
    [:button {:text "+ Event",
-             :on-click (fn [_](add-event))}]
+             :on-click (fn [_] (add-event))}]
    [:text-view {:text (format-listing @listing),
                 :id ::listing}]])
+
+
 
 (defn get-elmt [elmt]
   (str (.getText (elmt (.getTag mylayout)))))
@@ -68,16 +70,6 @@
       (swap! listing update-in [date-key] (fnil conj []) [(get-elmt ::location) (get-elmt ::name)])
       (update-ui))))
 
-(defactivity org.stuff.events.MyActivity
-  :def a ; will be ignored in release mode
-  :on-create
-  (fn [this bundle]
-    (on-ui
-     (set-content-view! this
-      (make-ui (main-layout this))))
-    (on-ui
-     (set-elmt ::listing (format-listing @listing)))))
-
 (defn date-picker [activity]
   (proxy [DialogFragment DatePickerDialog$OnDateSetListener] []
     (onCreateDialog [savedInstanceState]
@@ -86,11 +78,18 @@
             month (.get c Calendar/MONTH)
             day (.get c Calendar/DAY_OF_MONTH)]
         (DatePickerDialog. activity this year month day)))
-     (onDateSet [view year month day]
-       (on-ui (.setText (::date (.getTag mylayout))
-                        (str year
-                             (format "%02d" (inc month))
-                             (format "%02d" day)))))))
+    (onDateSet [view year month day]
+      (on-ui (.setText (::date (.getTag mylayout))
+                       (str year
+                            (format "%02d" (inc month))
+                            (format "%02d" day)))))))
 
-(defn show-picker [activity dp]
-  (. dp show (. activity getFragmentManager) "datePicker"))
+(defactivity org.stuff.events.MyActivity
+  :def a
+  :on-create
+  (fn [this bundle]
+    (on-ui
+     (set-content-view! a
+      (make-ui (main-layout this))))
+    (on-ui
+     (set-elmt ::listing (format-listing @listing)))))
