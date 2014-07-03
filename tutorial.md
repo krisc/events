@@ -157,7 +157,7 @@ Note that the return value for the widget objects will probably be different for
 Now let's have that button do some work.
 
 ```clojure
-(declare android.widget.LinearLayout mylayout)
+(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 
 (def main-layout [:linear-layout {:orientation :vertical,
@@ -263,9 +263,9 @@ If you're coding along at home (and I hope you are!), here is what our code shou
 (ns org.stuff.events.main
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui]]))
+        [neko.ui :only [make-ui config]]))
 
-(declare android.widget.LinearLayout mylayout)
+(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 
 (def listing (atom ""))
@@ -286,7 +286,7 @@ If you're coding along at home (and I hope you are!), here is what our code shou
   (str (.getText (elmt (.getTag mylayout)))))
 
 (defn set-elmt [elmt s]
-  (on-ui (.setText (elmt (.getTag mylayout)) s)))
+  (on-ui (config (elmt (.getTag mylayout)) :text s)))
 
 (defn update-ui []
   (set-elmt ::listing @listing)
@@ -344,7 +344,7 @@ First, let's add some imports into our `ns` form:
 (ns org.stuff.events.main
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui]]
+        [neko.ui :only [make-ui config]]
         [neko.application :only [defapplication]])
   (:import (java.util Calendar)
            (android.app Activity)
@@ -442,19 +442,18 @@ Note that the new `:text-view` element and the button that spawns the picker are
             day (.get c Calendar/DAY_OF_MONTH)]
         (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
-       (on-ui (.setText (::date (.getTag mylayout))
-                        (str year
-                             (format "%02d" (inc month))
-                             (format "%02d" day)))))))
+       (set-elmt ::date
+            	(str year
+	             (format "%02d" (inc month))
+                     (format "%02d" day))))))
 ```
 
-Now try the `date-picker` again. Let's change `add-event` to include the date.
+Now try the `date-picker` again. Let's change `add-event` to include the date. And let's clean it up a bit[*](#*).
 
 ```clojure
 (defn add-event []
-  (swap! listing str (get-elmt ::date) " - "
-         (get-elmt ::location) " - " 
-         (get-elmt ::name) "\n")
+  (swap! listing str 
+  	 (apply format "%d - %s - %s\n" (map get-elmt [::date ::location ::name])))
   (update-ui))
 ```
 
@@ -470,7 +469,7 @@ Go ahead and try it out. Here's what our source file looks like so far:
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
            (android.app DialogFragment)))
 
-(declare android.widget.LinearLayout mylayout)
+(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 (declare date-picker)
 
@@ -503,7 +502,7 @@ Go ahead and try it out. Here's what our source file looks like so far:
   (str (.getText (elmt (.getTag mylayout)))))
 
 (defn set-elmt [elmt s]
-  (on-ui (.setText (elmt (.getTag mylayout)) s)))
+  (on-ui (config (elmt (.getTag mylayout)) :text s)))
 
 (defn update-ui []
   (set-elmt ::listing @listing)
@@ -511,10 +510,8 @@ Go ahead and try it out. Here's what our source file looks like so far:
   (set-elmt ::name ""))
 
 (defn add-event []
-  (swap! listing str
-  	 (get-elmt ::date) " - "
-  	 (get-elmt ::location) " - " 
- 	 (get-elmt ::name) "\n")
+  (swap! listing str 
+  	 (apply format "%d - %s - %s\n" (map get-elmt [::date ::location ::name])))
   (update-ui))
 
 (defn date-picker [activity]
@@ -526,10 +523,10 @@ Go ahead and try it out. Here's what our source file looks like so far:
             day (.get c Calendar/DAY_OF_MONTH)]
         (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
-       (on-ui (.setText (::date (.getTag mylayout))
-                        (str year
-                             (format "%02d" (inc month))
-                             (format "%02d" day)))))))
+       (set-elmt ::date
+            	(str year
+	             (format "%02d" (inc month))
+                     (format "%02d" day))))))
 
 (defactivity org.stuff.events.MyActivity
   :def a
@@ -549,7 +546,7 @@ Now that we have dates, we can sort our listing. Let's change our `listing` atom
 (def listing (atom (sorted-map)))
 ```
 
-We will now make a major change to the `add-event` function. Are you ready? Let's leave formatting out of this and only deal with updating our data structure. The keys to our map will be an integer representing the date. Each date should be able to hold multiple events, so the value of the key will be a vector of location and name vectors[*](#*).
+We will now make a major change to the `add-event` function. Are you ready? Let's leave formatting out of this and only deal with updating our data structure. The keys to our map will be an integer representing the date. Each date should be able to hold multiple events, so the value of the key will be a vector of location and name vectors[**](#**).
 
 ```clojure
 (defn add-event []
@@ -568,7 +565,7 @@ looking too ugly: one to format the dates and one to format the events within ea
 (ns org.stuff.events.main
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui]]
+        [neko.ui :only [make-ui config]]
         [clojure.string :only [join]])
   (:import (java.util Calendar)
            (android.view View)
@@ -636,7 +633,7 @@ Here is the source code so far:
 (ns org.stuff.events.main
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui]]
+        [neko.ui :only [make-ui config]]
         [neko.application :only [defapplication]]
         [clojure.string :only [join]])
   (:import (java.util Calendar)
@@ -645,7 +642,7 @@ Here is the source code so far:
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
            (android.app DialogFragment)))
 
-(declare android.widget.LinearLayout mylayout)
+(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 (declare date-picker)
 (defn show-picker [activity dp]
@@ -688,7 +685,7 @@ Here is the source code so far:
   (str (.getText (elmt (.getTag mylayout)))))
 
 (defn set-elmt [elmt s]
-  (on-ui (.setText (elmt (.getTag mylayout)) s)))
+  (on-ui (config (elmt (.getTag mylayout)) :text s)))
 
 (defn update-ui []
   (set-elmt ::listing (format-listing @listing))
@@ -713,11 +710,11 @@ Here is the source code so far:
             day (.get c Calendar/DAY_OF_MONTH)]
         (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
-       (on-ui (.setText (::date (.getTag mylayout))
-                        (str year
-                             (format "%02d" (inc month))
-                             (format "%02d" day)))))))
-
+       (set-elmt ::date
+            	(str year
+	             (format "%02d" (inc month))
+                     (format "%02d" day))))))
+                     
 (defactivity org.stuff.events.MyActivity
   :def a
   :on-create
@@ -783,7 +780,9 @@ Problems? Please [open an issue on GitHub](https://github.com/krisc/events/issue
 
 ###Notes
 
-\* <a name="*"></a> Special thanks to GitHubber [juergenhoetzel](https://github.com/krisc/events/pull/7) for cleaning up my previously imperative (and monstrous) code and making it more Clojure-y.
+\* <a name="*"></a> Thanks to David Yarmouth for refactoring this to be DRYer (Don't Repeat Yourself).
+
+\*\* <a name="**"></a> Thanks to GitHubber [juergenhoetzel](https://github.com/krisc/events/pull/7) for cleaning up my previously imperative (and monstrous) code and making it more Clojure-y. Also, thanks again to David Yarmouth for helping me refactor this.
 
 1.<a name="1"></a> In ["Code's Worst Enemy"](http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html) Steve Yegge writes:
 >Bigger is just something you have to live with in Java. Growth is a fact of life. Java is like a variant of the game of Tetris in which none of the pieces can fill gaps created by the other pieces, so all you can do is pile them up endlessly.
