@@ -67,7 +67,9 @@
                    (Integer/parseInt (get-elmt ::date))
                    (catch RuntimeException e "Date string is empty!"))]
     (when (number? date-key)
-      (swap! listing update-in [date-key] (fnil conj []) [(get-elmt ::location) (get-elmt ::name)])
+      (swap! listing
+             update-in [date-key] (fnil conj [])
+             (mapv get-elmt [::location ::name]))
       (update-ui))))
 
 (defn date-picker [activity]
