@@ -263,7 +263,7 @@ If you're coding along at home (and I hope you are!), here is what our code shou
 (ns org.stuff.events.main
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui]]))
+        [neko.ui :only [make-ui config]]))
 
 (declare android.widget.LinearLayout mylayout)
 (declare add-event)
@@ -344,7 +344,7 @@ First, let's add some imports into our `ns` form:
 (ns org.stuff.events.main
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui]]
+        [neko.ui :only [make-ui config]]
         [neko.application :only [defapplication]])
   (:import (java.util Calendar)
            (android.app Activity)
@@ -568,7 +568,7 @@ looking too ugly: one to format the dates and one to format the events within ea
 (ns org.stuff.events.main
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui]]
+        [neko.ui :only [make-ui config]]
         [clojure.string :only [join]])
   (:import (java.util Calendar)
            (android.view View)
@@ -636,7 +636,7 @@ Here is the source code so far:
 (ns org.stuff.events.main
   (:use [neko.activity :only [defactivity set-content-view!]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui]]
+        [neko.ui :only [make-ui config]]
         [neko.application :only [defapplication]]
         [clojure.string :only [join]])
   (:import (java.util Calendar)
