@@ -82,9 +82,7 @@
         (DatePickerDialog. activity this year month day)))
     (onDateSet [view year month day]
       (set-elmt ::date
-                (str year
-                     (format "%02d" (inc month))
-                     (format "%02d" day))))))
+                (format "%d%02d%02d" year (inc month) day)))))
 
 (defactivity org.stuff.events.MyActivity
   :def a
