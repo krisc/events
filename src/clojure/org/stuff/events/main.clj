@@ -64,7 +64,7 @@
 
 (defn add-event []
   (let [date-key (try
-                   (read-string (get-elmt ::date))
+                   (Integer/parseInt (get-elmt ::date))
                    (catch RuntimeException e "Date string is empty!"))]
     (when (number? date-key)
       (swap! listing update-in [date-key] (fnil conj []) [(get-elmt ::location) (get-elmt ::name)])
