@@ -448,13 +448,12 @@ Note that the new `:text-view` element and the button that spawns the picker are
                      (format "%02d" day))))))
 ```
 
-Now try the `date-picker` again. Let's change `add-event` to include the date.
+Now try the `date-picker` again. Let's change `add-event` to include the date. And let's clean it up a bit[*](#*).
 
 ```clojure
 (defn add-event []
-  (swap! listing str (get-elmt ::date) " - "
-         (get-elmt ::location) " - " 
-         (get-elmt ::name) "\n")
+  (swap! listing str 
+  	 (apply format "%d - %s - %s\n" (map get-elmt [::date ::location ::name])))
   (update-ui))
 ```
 
@@ -511,10 +510,8 @@ Go ahead and try it out. Here's what our source file looks like so far:
   (set-elmt ::name ""))
 
 (defn add-event []
-  (swap! listing str
-  	 (get-elmt ::date) " - "
-  	 (get-elmt ::location) " - " 
- 	 (get-elmt ::name) "\n")
+  (swap! listing str 
+  	 (apply format "%d - %s - %s\n" (map get-elmt [::date ::location ::name])))
   (update-ui))
 
 (defn date-picker [activity]
@@ -783,7 +780,9 @@ Problems? Please [open an issue on GitHub](https://github.com/krisc/events/issue
 
 ###Notes
 
-\* <a name="*"></a> Special thanks to GitHubber [juergenhoetzel](https://github.com/krisc/events/pull/7) for cleaning up my previously imperative (and monstrous) code and making it more Clojure-y.
+\* <a name="*"></a> Special thanks to GitHubber [juergenhoetzel](https://github.com/krisc/events/pull/7) for cleaning up my previously imperative (and monstrous) code and making it more Clojure-y. Also, thanks to David Yarmouth for helping me refactor this.
+
+\*\* <a name="**"></a> Thanks again to David Yarmouth for refactoring this to be DRYer (Don't Repeat Yourself).
 
 1.<a name="1"></a> In ["Code's Worst Enemy"](http://steve-yegge.blogspot.com/2007/12/codes-worst-enemy.html) Steve Yegge writes:
 >Bigger is just something you have to live with in Java. Growth is a fact of life. Java is like a variant of the game of Tetris in which none of the pieces can fill gaps created by the other pieces, so all you can do is pile them up endlessly.
