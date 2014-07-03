@@ -526,10 +526,10 @@ Go ahead and try it out. Here's what our source file looks like so far:
             day (.get c Calendar/DAY_OF_MONTH)]
         (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
-       (on-ui (.setText (::date (.getTag mylayout))
-                        (str year
-                             (format "%02d" (inc month))
-                             (format "%02d" day)))))))
+       (set-elmt ::date
+            	(str year
+	             (format "%02d" (inc month))
+                     (format "%02d" day))))))
 
 (defactivity org.stuff.events.MyActivity
   :def a
