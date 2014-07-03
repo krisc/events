@@ -443,9 +443,7 @@ Note that the new `:text-view` element and the button that spawns the picker are
         (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
        (set-elmt ::date
-            	(str year
-	             (format "%02d" (inc month))
-                     (format "%02d" day))))))
+		 (format "%d%02d%02d" year (inc month) day)))))
 ```
 
 Now try the `date-picker` again. Let's change `add-event` to include the date. And let's clean it up a bit[*](#*).
@@ -524,9 +522,7 @@ Go ahead and try it out. Here's what our source file looks like so far:
         (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
        (set-elmt ::date
-            	(str year
-	             (format "%02d" (inc month))
-                     (format "%02d" day))))))
+		 (format "%d%02d%02d" year (inc month) day)))))
 
 (defactivity org.stuff.events.MyActivity
   :def a
@@ -711,10 +707,8 @@ Here is the source code so far:
         (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
        (set-elmt ::date
-            	(str year
-	             (format "%02d" (inc month))
-                     (format "%02d" day))))))
-                     
+		 (format "%d%02d%02d" year (inc month) day)))))
+
 (defactivity org.stuff.events.MyActivity
   :def a
   :on-create
