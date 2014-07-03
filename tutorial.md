@@ -286,7 +286,7 @@ If you're coding along at home (and I hope you are!), here is what our code shou
   (str (.getText (elmt (.getTag mylayout)))))
 
 (defn set-elmt [elmt s]
-  (on-ui (.setText (elmt (.getTag mylayout)) s)))
+  (on-ui (config (elmt (.getTag mylayout)) :text s)))
 
 (defn update-ui []
   (set-elmt ::listing @listing)
