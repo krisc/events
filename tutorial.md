@@ -503,7 +503,7 @@ Go ahead and try it out. Here's what our source file looks like so far:
   (str (.getText (elmt (.getTag mylayout)))))
 
 (defn set-elmt [elmt s]
-  (on-ui (.setText (elmt (.getTag mylayout)) s)))
+  (on-ui (config (elmt (.getTag mylayout)) :text s)))
 
 (defn update-ui []
   (set-elmt ::listing @listing)
@@ -688,7 +688,7 @@ Here is the source code so far:
   (str (.getText (elmt (.getTag mylayout)))))
 
 (defn set-elmt [elmt s]
-  (on-ui (.setText (elmt (.getTag mylayout)) s)))
+  (on-ui (config (elmt (.getTag mylayout)) :text s)))
 
 (defn update-ui []
   (set-elmt ::listing (format-listing @listing))
@@ -713,11 +713,11 @@ Here is the source code so far:
             day (.get c Calendar/DAY_OF_MONTH)]
         (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
-       (on-ui (.setText (::date (.getTag mylayout))
-                        (str year
-                             (format "%02d" (inc month))
-                             (format "%02d" day)))))))
-
+       (set-elmt ::date
+            	(str year
+	             (format "%02d" (inc month))
+                     (format "%02d" day))))))
+                     
 (defactivity org.stuff.events.MyActivity
   :def a
   :on-create
