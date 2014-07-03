@@ -157,7 +157,7 @@ Note that the return value for the widget objects will probably be different for
 Now let's have that button do some work.
 
 ```clojure
-(declare android.widget.LinearLayout mylayout)
+(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 
 (def main-layout [:linear-layout {:orientation :vertical,
@@ -265,7 +265,7 @@ If you're coding along at home (and I hope you are!), here is what our code shou
         [neko.threading :only [on-ui]]
         [neko.ui :only [make-ui config]]))
 
-(declare android.widget.LinearLayout mylayout)
+(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 
 (def listing (atom ""))
@@ -470,7 +470,7 @@ Go ahead and try it out. Here's what our source file looks like so far:
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
            (android.app DialogFragment)))
 
-(declare android.widget.LinearLayout mylayout)
+(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 (declare date-picker)
 
@@ -645,7 +645,7 @@ Here is the source code so far:
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
            (android.app DialogFragment)))
 
-(declare android.widget.LinearLayout mylayout)
+(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 (declare date-picker)
 (defn show-picker [activity dp]
