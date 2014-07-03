@@ -442,10 +442,10 @@ Note that the new `:text-view` element and the button that spawns the picker are
             day (.get c Calendar/DAY_OF_MONTH)]
         (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
-       (on-ui (.setText (::date (.getTag mylayout))
-                        (str year
-                             (format "%02d" (inc month))
-                             (format "%02d" day)))))))
+       (set-elmt ::date
+            	(str year
+	             (format "%02d" (inc month))
+                     (format "%02d" day))))))
 ```
 
 Now try the `date-picker` again. Let's change `add-event` to include the date.
