@@ -28,6 +28,8 @@ neko 3.0.1
 compliment 0.0.3
 ```
 
+You may use [DroidBox](https://github.com/TerjeNorderhaug/droidbox) on VirtualBox for a canonical build environment that is compatible with this tutorial.
+
 Now that you have been **forewarned**, let's begin. If you run into problems, please [open an issue on GitHub](https://github.com/krisc/events/issues), and I'll try my best to help you out.
 
 ### What are we making?
