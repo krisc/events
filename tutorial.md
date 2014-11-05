@@ -14,18 +14,17 @@ This tutorial is directed towards Clojure programmers who are seeking an alterna
 
 We will be using Alex Yakushev's [lein-droid](https://github.com/clojure-android/lein-droid) tool for project management. We will also be using Alex's fork of Daniel Solano Gómez's [neko library](https://github.com/alexander-yakushev/neko/wiki) which provides function wrappers and alternatives to the Android Java API. However, neko does not replace everything as of the time of this writing and is subject to change so keep the [Android docs](http://developer.android.com/reference/packages.html) handy. There will be some Java interop in this tutorial. We will be using [emacs](http://www.gnu.org/software/emacs/) with the [nrepl] (https://github.com/clojure/tools.nrepl) plugin for this tutorial.
 
-**Be forewarned:** some tools in this setup are still very young and are in fast development. New versions may pop up as of the time of this writing (May 21, 2014) and may introduce breaking changes. For your information, here are the versions of the tools that I am using:
+**Be forewarned:** some tools in this setup are still very young and are in fast development. New versions may pop up as of the time of this writing (November 5, 2014) and may introduce breaking changes. For your information, here are the versions of the tools that I am using:
 
 ```
 Arch Linux
-Java 1.7.0_51
-clojure-android/clojure 1.6.0-RC1
-Leiningen 2.3.3
-lein-droid 0.2.3
+Java 1.7.0_71
+org.clojure-android/clojure 1.7.0-alpha3
+Leiningen 2.4.2
+lein-droid 0.3.0-beta3
 Android SDK Tools 22.6.3
-nrepl 0.2.3
-neko 3.0.1
-compliment 0.0.3
+org.clojure-android/nrepl 0.2.6
+neko 3.1.0-preview1
 ```
 
 Now that you have been **forewarned**, let's begin. If you run into problems, please [open an issue on GitHub](https://github.com/krisc/events/issues), and I'll try my best to help you out.
@@ -46,22 +45,22 @@ Alex's [Tutorial](https://github.com/clojure-android/lein-droid/wiki/Tutorial) i
 
 This is how my `~/.lein/profiles.clj` looks like:
 ```clojure
-{:user {:plugins [ [lein-droid "0.2.3"] ]
-        :android {:sdk-path "/home/kris/adt-bundle-linux-x86_64-20130522/sdk/"}}}
+{:user {:plugins [ [lein-droid "0.3.0-beta3"] ] }}
 ```
-
-NOTE: Change the directory to reflect your own sdk's path. And if
-there is a later version of `lein-droid`, consider using that.
 
 Run this command at the terminal:
 
 ```bash
-lein droid new events org.stuff.events :activity MyActivity :target-sdk 15 :app-name EventsListing
+lein droid new events org.stuff.events :activity MainActivity :target-sdk 15 :app-name EventsListing
 ```
 
-This will create a template file structure for an Android app. Open
-the `project.clj` file and change the `neko` version in `:dependencies` to
-`"3.0.0-preview4"`.
+This will create a template file structure for an Android app. Open the `project.clj` file and make sure the `neko` version in `:dependencies` is `"3.1.0-preview1"`. Also put the following into `:android` map (change the directory to reflect your own sdk's path):
+
+```clojure
+:sdk-path "/home/kris/adt-bundle-linux-x86_64-20130522/sdk/"
+```
+
+You can also put this option into `profiles.clj` as described [here](https://github.com/clojure-android/lein-droid/wiki/Profiles#android-common). Note that you shouldn't use `:user` profile for this as it is ignored by default in lein-droid projects.
 
 If you have an actual Android device at hand, connect it to your
 computer. If not, you can setup an [emulator](http://developer.android.com/tools/devices/emulator.html). Now run `lein droid doall` at the terminal. This will build the app, install the app to your device, and open an `nREPL` server within the running app.
@@ -74,7 +73,7 @@ If you don't already have Cider installed, you can install it by running this in
 
 To enter the namespace, type this command into the REPL: `(in-ns 'org.stuff.events.main)` To start evaluating definitions within our app's namespace, evaluate the `ns` form in the source file by entering the `emacs` command `C-c C-n` (or by moving the cursor after the closing parenthesis of the `ns` form and hitting `C-x C-e`).
 
-Let's now code a definition for the layout of the app. The `make-ui` macro takes in a vector of elements which will be transformed into XML ([learn more here](https://github.com/alexander-yakushev/neko/wiki/User-interface)). This structure can be anonymously passed into `make-ui`, but let's give it a named definition:
+Let's now code a definition for the layout of the app. The `set-content-view!` function takes in a vector of elements which will be transformed into XML ([learn more here](https://github.com/alexander-yakushev/neko/wiki/User-interface)). This structure can be anonymously passed into `set-content-view!`, but let's give it a named definition:
 
 ```clojure
 (def main-layout [:linear-layout {:orientation :vertical}
@@ -85,14 +84,16 @@ Let's now code a definition for the layout of the app. The `make-ui` macro takes
 Evaluate this `def` form. Let's change the `defactivity` form to look like this:
 
 ```clojure
-(defactivity org.stuff.events.MyActivity
-  :def a
+(defactivity org.stuff.events.MainActivity
+  :key :main
   :on-create
   (fn [this bundle]
     (on-ui
-     (set-content-view! a
-      (make-ui main-layout)))))
+     (set-content-view! (*a) main-layout))
+    ))
 ```
+
+You might wonder what `(*a)` is. It is a development convenience macro that returns Activity instance when called inside the namespace with `defactivity`. But please keep in mind that it is strongly suggested to use `(*a)` only during the development. For the release version replace calls to `(*a)` with proper passing the Activity instance as an argument (here `this` is bound to Activity instance, and you can pass it to other functions).
 
 ### Interactive Development
 
@@ -118,11 +119,7 @@ Evaluate this form. Then evaluate the `on-ui` form to update the app. (From now 
 The app doesn't really do anything right now. Let's add attributes to our layout elements for functionality.
 
 ```clojure
-(declare ^android.widget.LinearLayout mylayout)
-
-(def main-layout [:linear-layout {:orientation :vertical,
-     		 		  :id-holder true
-                                  :def `mylayout}
+(def main-layout [:linear-layout {:orientation :vertical}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
                   [:edit-text {:hint "Event location",
@@ -130,45 +127,55 @@ The app doesn't really do anything right now. Let's add attributes to our layout
                   [:button {:text "+ Event"}]])
 ```
 
-In order to access the layout by name, we added a `:def` attribute to our `main-layout`, an `:id-holder` flag, and a forward declaration form near the top of the source file. Additionally, our `edit-text` elements have `:id` attributes with a keyword value. The `declare` form allows us later to compile this code using AOT (more on using `lein` to build later).
+Re-evaluate the `(on-ui ...)` form.
 
-With these additions, we can now access the values of these elements using `.getTag`. Enter some text into the edit-text fields in the running app:
+In order to access the layout by name, we added a `:id` attributes with a keyword value to our `edit-text` elements. We should also import some additional functions:
+
+```clojure
+(ns org.stuff.events.main
+  (:use [neko.activity :only [defactivity set-content-view! *a]]
+        [neko.find-view :only [find-view]]
+        [neko.threading :only [on-ui]])
+  (:import android.widget.TextView))
+```
+
+With these additions, we can now access the values of these elements using `find-view`. Enter some text into the edit-text fields in the running app:
 
 ![screen 3](screen3.png)
 
 Then try these at the REPL:
 
 ```clojure
-org.stuff.events.main> (.getTag mylayout)
-{:org.stuff.events.main/location #<EditText android.widget.EditText@42315c30>, :org.stuff.events.main/name #<EditText android.widget.EditText@42206a18>}
-org.stuff.events.main> (str (.getText (::name (.getTag mylayout))))
+org.stuff.events.main> (find-view (*a) ::name)
+#<EditText android.widget.EditText{659eb5d0 VFED..CL ........ 0,0-360,122 #1ce18747}>
+org.stuff.events.main> (str (.getText (find-view (*a) ::name)))
 "Party"
-org.stuff.events.main> (str (.getText (::location (.getTag mylayout))))
+org.stuff.events.main> (str (.getText (find-view (*a) ::location)))
 "Your Place"
 ```
 
 Note that the return value for the widget objects will probably be different for you. Now let's write a helper function for our convenience:
 
 ```clojure
-(defn get-elmt [elmt]
-  (str (.getText (elmt (.getTag mylayout)))))
+(defn get-elmt [activity elmt]
+  (str (.getText ^TextView (find-view activity elmt))))
 ```
+
+Note how we type-hinted the argument to `.getText` to avoid reflection. Since `EditText` inherits `TextView`, we can use the latter hint to retrieve text from edit fields.
 
 Now let's have that button do some work.
 
 ```clojure
-(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 
-(def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder true,
-                                  :def `mylayout}
+(def main-layout [:linear-layout {:orientation :vertical}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
                   [:edit-text {:hint "Event location",
                                :id ::location}]
                   [:button {:text "+ Event",
-                            :on-click (fn [_] (add-event))}]])
+                            :on-click (fn [^android.widget.Button b]
+                                        (add-event (.getContext b)))}]])
 ```
 
 We added an `:on-click` attribute to our `:button` element whose value is a callback function. Note the forward declaration for that callback function.
@@ -178,26 +185,50 @@ Well, we know that we need to add an event to the listing. First, let's add a ne
 ```clojure
 (def listing (atom ""))
 
-(def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder true,
-                                  :def `mylayout}
+(def main-layout [:linear-layout {:orientation :vertical}
                   [:edit-text {:hint "Event name",
                                :id ::name}]
                   [:edit-text {:hint "Event location",
                                :id ::location}]
-                  [:button {:text "+ Event",
-                            :on-click (fn [_] (add-event))}]
+                  [:button {:text "+ Event"
+                            :on-click (fn [^android.widget.Button b]
+                                        (add-event (.getContext b)))}]
                   [:text-view {:text @listing,
-                              :id ::listing}]])
+                               :id ::listing}]])
 ```
 
 The value of the listing atom is used for the :text attribute of the newly added :text-view element.
 
+Note how we used the Button object provided as an argument to callback to extract Activity (Context) instance and pass it to `add-event`. While you can use tricks like these, you'll soon reach the point when an explicit Activity object is required in defining the layout. Besides, it's a good idea to keep the number of `def` (eager evaluation) lower. So, let's replace the `def` with `defn`:
+
+```clojure
+(defn main-layout [activity]
+  [:linear-layout {:orientation :vertical}
+   [:edit-text {:hint "Event name",
+                :id ::name}]
+   [:edit-text {:hint "Event location",
+                :id ::location}]
+   [:button {:text "+ Event"
+             :on-click (fn [_] (add-event activity))}]
+   [:text-view {:text @listing,
+                :id ::listing}]])
+```
+
+Also remember to update the following line in the defactivity:
+
+```clojure
+(set-content-view! (*a) (main-layout (*a)))
+```
+
+See how we still use `(*a)`. We could use it just the same in `main-layout`! —
+you might say. But it would be impossible to replace it with proper Activity
+argument later, if we didn't turn main-layout into a function.
+
 Before we define the callback function, let's play with the REPL and figure out what we actually want to do when the user hits that button. First, we want to update the listing atom with the contents of the `:edit-text` fields. Enter an event in the running app then run this in the REPL:
 
 ```clojure
-org.stuff.events.main> (swap! listing str (get-elmt ::location) " - " 
-		       (get-elmt ::name) "\n")
+org.stuff.events.main> (swap! listing str (get-elmt (*a) ::location) " - " 
+		       (get-elmt (*a) ::name) "\n")
 "Your Place - Party\n"
 ```
 
@@ -205,7 +236,7 @@ Next, we want to update the ui with the listing. We can use the `config` macro i
 
 ```clojure
 ...
-[neko.ui :only [make-ui config]]
+[neko.ui :only [config]]
 ...
 ```
 
@@ -213,23 +244,23 @@ Run `C-c C-n` to evaluate the `ns` form then evaluate that `on-ui` form in the `
 
 
 ```clojure
-org.stuff.events.main> (on-ui (config (::listing (.getTag mylayout)) :text @listing))
+org.stuff.events.main> (on-ui (config (find-view (*a) ::listing) :text @listing))
 ```
 
 Let's write another helper function for setting the text of our elements.
 
 ```clojure
-(defn set-elmt [elmt s]
-  (on-ui (config (elmt (.getTag mylayout)) :text s)))
+(defn set-elmt [activity elmt s]
+  (on-ui (config (find-view activity elmt) :text s)))
 ```
 
 Let's have our callback function perform these two tasks:
 
 ```clojure
-(defn add-event []
-  (swap! listing str (get-elmt ::location) " - " 
-		   (get-elmt ::name) "\n")
-  (set-elmt ::listing @listing))
+(defn add-event [activity]
+  (swap! listing str (get-elmt activity ::location) " - " 
+         (get-elmt activity ::name) "\n")
+  (set-elmt activity ::listing @listing))
 ```
 
 Now try hitting that button. Cool, huh?
@@ -241,73 +272,75 @@ If you need to clear your listing, just run `(def listing (atom ""))`.
 Hitting the button should also clear the edit fields. Let's write a function to take care of all that.
 
 ```clojure
-(defn update-ui []
-  (set-elmt ::listing @listing)
-  (set-elmt ::location "")
-  (set-elmt ::name ""))
+(defn update-ui [activity]
+  (set-elmt activity ::listing @listing)
+  (set-elmt activity ::location "")
+  (set-elmt activity ::name ""))
 
 ```
 
 And let's have our `add-event` function call this.
 
 ```clojure
-(defn add-event []
-  (swap! listing str (get-elmt ::location) " - " 
-		   (get-elmt ::name) "\n")
-  (update-ui))
+(defn add-event [activity]
+  (swap! listing str (get-elmt activity ::location) " - " 
+         (get-elmt activity ::name) "\n")
+  (update-ui activity))
 ```
 
 If you're coding along at home (and I hope you are!), here is what our code should look like so far:
 
 ```clojure
 (ns org.stuff.events.main
-  (:use [neko.activity :only [defactivity set-content-view!]]
-        [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui config]]))
+  (:use [neko.activity :only [defactivity set-content-view! *a]]
+        [neko.find-view :only [find-view]]
+        [neko.ui :only [config]]
+        [neko.threading :only [on-ui]])
+  (:import android.widget.TextView))
 
-(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 
 (def listing (atom ""))
 
-(def main-layout [:linear-layout {:orientation :vertical,
-                                  :id-holder true,
-                                  :def `mylayout}
-                  [:edit-text {:hint "Event name",
-                               :id ::name}]
-                  [:edit-text {:hint "Event location",
-                               :id ::location}]
-                  [:button {:text "+ Event",
-                            :on-click (fn [_](add-event))}]
-                  [:text-view {:text @listing,
-                              :id ::listing}]])
+(defn main-layout [activity]
+  [:linear-layout {:orientation :vertical}
+   [:edit-text {:hint "Event name",
+                :id ::name}]
+   [:edit-text {:hint "Event location",
+                :id ::location}]
+   [:button {:text "+ Event"
+             :on-click (fn [_] (add-event activity))}]
+   [:text-view {:text @listing,
+                :id ::listing}]])
 
-(defn get-elmt [elmt]
-  (str (.getText (elmt (.getTag mylayout)))))
+(defn get-elmt [activity elmt]
+  (str (.getText ^TextView (find-view activity elmt))))
 
-(defn set-elmt [elmt s]
-  (on-ui (config (elmt (.getTag mylayout)) :text s)))
+(defn set-elmt [activity elmt s]
+  (on-ui (config (find-view activity elmt) :text s)))
 
-(defn update-ui []
-  (set-elmt ::listing @listing)
-  (set-elmt ::location "")
-  (set-elmt ::name ""))
+(defn update-ui [activity]
+  (set-elmt activity ::listing @listing)
+  (set-elmt activity ::location "")
+  (set-elmt activity ::name ""))
 
-(defn add-event []
-  (swap! listing str (get-elmt ::location) " - " 
-		   (get-elmt ::name) "\n")
-  (update-ui))
+(defn add-event [activity]
+  (swap! listing str (get-elmt activity ::location) " - " 
+         (get-elmt activity ::name) "\n")
+  (update-ui activity))
 
-(defactivity org.stuff.events.MyActivity
-  :def a
+(defactivity org.stuff.events.MainActivity
+  :key :main
   :on-create
   (fn [this bundle]
     (on-ui
-     (set-content-view! a
-      (make-ui main-layout)))))
+      (set-content-view! (*a) (main-layout (*a))))
+    ))
 ```
 
-So far so good... So what? It might be a good idea to build your app right now by running at the terminal `lein droid doall`. Note that you may have to connect your REPL again after you run this command.
+So far so good... But if you now rotate your screen, everything will disappear. To prevent this reload (`C-x C-e`) the whole `defactivity` form. This will preserve the UI across orientation changes.
+
+What now? It might be a good idea to build your app right now by running at the terminal `lein droid doall`, though it is not mandatory, you can just continue as is. Note that you may have to connect your REPL again after you run this command.
 
 ### Just One Little Fix
 
@@ -316,15 +349,15 @@ So far so good... So what? It might be a good idea to build your app right now b
 If you rotated your screen, you may have noticed that the listing disappears. Let's fix that, shall we?
 
 ```clojure
-(defactivity org.stuff.events.MyActivity
-  :def a
+(defactivity org.stuff.events.MainActivity
+  :key :main
   :on-create
   (fn [this bundle]
     (on-ui
-     (set-content-view! a
-      (make-ui main-layout)))
+      (set-content-view! (*a) (main-layout (*a))))
     (on-ui
-     (set-elmt ::listing @listing))))
+      (set-elmt (*a) ::listing @listing))
+    ))
 ```
 
 Rotate your screen.
@@ -342,11 +375,12 @@ First, let's add some imports into our `ns` form:
 
 ```clojure
 (ns org.stuff.events.main
-  (:use [neko.activity :only [defactivity set-content-view!]]
-        [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui config]]
-        [neko.application :only [defapplication]])
-  (:import (java.util Calendar)
+  (:use [neko.activity :only [defactivity set-content-view! *a]]
+        [neko.find-view :only [find-view]]
+        [neko.ui :only [config]]
+        [neko.threading :only [on-ui]])
+  (:import android.widget.TextView
+           (java.util Calendar)
            (android.app Activity)
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
            (android.app DialogFragment)))
@@ -362,7 +396,7 @@ Now we will use `proxy` to create an instance of an anonymous class:
             year (.get c Calendar/YEAR)
             month (.get c Calendar/MONTH)
             day (.get c Calendar/DAY_OF_MONTH)]
-        (DatePickerDialog. activity this year month day)))
+p        (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day])))
 ```
 
@@ -370,50 +404,29 @@ We will finish the `onDateSet` listener code in a bit. Calling this function cre
 
 ```clojure
 (declare date-picker)
-(defn show-picker [activity dp]
+(defn show-picker [^Activity activity dp]
   (. dp show (. activity getFragmentManager) "datePicker"))
-  
+
 (defn main-layout [activity]
-  [:linear-layout {:orientation :vertical,
-                   :id-holder :true,
-                   :def `mylayout}
+  [:linear-layout {:orientation :vertical}
    [:edit-text {:hint "Event name",
                 :id ::name}]
    [:edit-text {:hint "Event location",
                 :id ::location}]
    [:button {:text "...",
              :on-click (fn [_] (show-picker activity 
-                                            (date-picker activity)))}]
-   [:button {:text "+ Event",
-             :on-click (fn [_](add-event))}]
+                                           (date-picker activity)))}]
+   [:button {:text "+ Event"
+             :on-click (fn [_] (add-event activity))}]
    [:text-view {:text @listing,
                 :id ::listing}]])
 ```
 
-Before we continue, we need change the `defactivity` form since we are now using `main-layout` as a function with the `activity` passed in. Note the use of `this`.
-
-```clojure
-(defactivity org.stuff.events.MyActivity
-  :def a
-  :on-create
-  (fn [this bundle]
-    (on-ui
-     (set-content-view! this
-      (make-ui (main-layout this))))
-    (on-ui
-     (set-elmt ::listing @listing))))
-```
-
-It is important to note that the `:def a` line will be ignored for the release build. You may use the `a` reference when you are debugging, but remember to remove all uses of `a` before making your release build. Also note that re-evaluating this form may not be enough since the `:on-create` callback needs to be called. Rotating your screen will do!
-
-
-Update your `ui` and try hitting that `...` button. Great, it works but doesn't do anything. We want that dialog update a `:text-view` with that chosen date. First we edit the layout:
+Update your UI and try hitting that `...` button. Great, it works but doesn't do anything. We want that dialog update a `:text-view` with that chosen date. First we edit the layout:
 
 ```clojure
 (defn main-layout [activity]
-  [:linear-layout {:orientation :vertical,
-                   :id-holder :true,
-                   :def `mylayout}
+  [:linear-layout {:orientation :vertical}
    [:edit-text {:hint "Event name",
                 :id ::name}]
    [:edit-text {:hint "Event location",
@@ -425,7 +438,7 @@ Update your `ui` and try hitting that `...` button. Great, it works but doesn't 
               :on-click (fn [_] (show-picker activity
                                             (date-picker activity)))}]]
    [:button {:text "+ Event",
-             :on-click (fn [_](add-event))}]
+             :on-click (fn [_] (add-event activity))}]
    [:text-view {:text @listing,
                 :id ::listing}]])
 ```
@@ -442,45 +455,44 @@ Note that the new `:text-view` element and the button that spawns the picker are
             day (.get c Calendar/DAY_OF_MONTH)]
         (DatePickerDialog. activity this year month day)))
      (onDateSet [view year month day]
-       (set-elmt ::date
+       (set-elmt activity ::date
 		 (format "%d%02d%02d" year (inc month) day)))))
 ```
 
 Now try the `date-picker` again. Let's change `add-event` to include the date. And let's clean it up a bit[*](#*).
 
 ```clojure
-(defn add-event []
+(defn add-event [activity]
   (swap! listing str 
-  	 (apply format "%d - %s - %s\n" (map get-elmt [::date ::location ::name])))
-  (update-ui))
+  	 (apply format "%s - %s - %s\n"
+                (map #(get-elmt activity %) [::date ::location ::name])))
+  (update-ui activity))
 ```
 
 Go ahead and try it out. Here's what our source file looks like so far:
 
 ```clojure
 (ns org.stuff.events.main
-  (:use [neko.activity :only [defactivity set-content-view!]]
-        [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui config]])
-  (:import (java.util Calendar)
+  (:use [neko.activity :only [defactivity set-content-view! *a]]
+        [neko.find-view :only [find-view]]
+        [neko.ui :only [config]]
+        [neko.threading :only [on-ui]])
+  (:import android.widget.TextView
+           (java.util Calendar)
            (android.app Activity)
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
            (android.app DialogFragment)))
 
-(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 (declare date-picker)
 
 (defn show-picker [activity dp]
   (. dp show (. activity getFragmentManager) "datePicker"))
 
-
 (def listing (atom ""))
 
 (defn main-layout [activity]
-  [:linear-layout {:orientation :vertical,
-                   :id-holder :true,
-                   :def `mylayout}
+  [:linear-layout {:orientation :vertical}
    [:edit-text {:hint "Event name",
                 :id ::name}]
    [:edit-text {:hint "Event location",
@@ -492,25 +504,26 @@ Go ahead and try it out. Here's what our source file looks like so far:
               :on-click (fn [_] (show-picker activity
                                             (date-picker activity)))}]]
    [:button {:text "+ Event",
-             :on-click (fn [_](add-event))}]
+             :on-click (fn [_] (add-event activity))}]
    [:text-view {:text @listing,
                 :id ::listing}]])
 
-(defn get-elmt [elmt]
-  (str (.getText (elmt (.getTag mylayout)))))
+(defn get-elmt [activity elmt]
+  (str (.getText ^TextView (find-view activity elmt))))
 
-(defn set-elmt [elmt s]
-  (on-ui (config (elmt (.getTag mylayout)) :text s)))
+(defn set-elmt [activity elmt s]
+  (on-ui (config (find-view activity elmt) :text s)))
 
-(defn update-ui []
-  (set-elmt ::listing @listing)
-  (set-elmt ::location "")
-  (set-elmt ::name ""))
+(defn update-ui [activity]
+  (set-elmt activity ::listing @listing)
+  (set-elmt activity ::location "")
+  (set-elmt activity ::name ""))
 
-(defn add-event []
+(defn add-event [activity]
   (swap! listing str 
-  	 (apply format "%d - %s - %s\n" (map get-elmt [::date ::location ::name])))
-  (update-ui))
+  	 (apply format "%s - %s - %s\n"
+                (map #(get-elmt activity %) [::date ::location ::name])))
+  (update-ui activity))
 
 (defn date-picker [activity]
   (proxy [DialogFragment DatePickerDialog$OnDateSetListener] []
@@ -520,19 +533,19 @@ Go ahead and try it out. Here's what our source file looks like so far:
             month (.get c Calendar/MONTH)
             day (.get c Calendar/DAY_OF_MONTH)]
         (DatePickerDialog. activity this year month day)))
-     (onDateSet [view year month day]
-       (set-elmt ::date
-		 (format "%d%02d%02d" year (inc month) day)))))
+    (onDateSet [view year month day]
+      (set-elmt activity ::date
+                (format "%d%02d%02d" year (inc month) day)))))
 
-(defactivity org.stuff.events.MyActivity
-  :def a
+(defactivity org.stuff.events.MainActivity
+  :key :main
   :on-create
   (fn [this bundle]
     (on-ui
-     (set-content-view! this
-      (make-ui (main-layout this))))
+      (set-content-view! (*a) (main-layout (*a))))
     (on-ui
-     (set-elmt ::listing @listing))))
+      (set-elmt (*a) ::listing @listing))
+    ))
 ```
 
 ###Sorting and Formatting the Listing
@@ -545,13 +558,14 @@ Now that we have dates, we can sort our listing. Let's change our `listing` atom
 We will now make a major change to the `add-event` function. Are you ready? Let's leave formatting out of this and only deal with updating our data structure. The keys to our map will be an integer representing the date. Each date should be able to hold multiple events, so the value of the key will be a vector of location and name vectors[**](#**).
 
 ```clojure
-(defn add-event []
+(defn add-event [activity]
   (let [date-key (try
-                   (read-string (get-elmt ::date))
+                   (read-string (get-elmt activity ::date))
                    (catch RuntimeException e "Date string is empty!"))]
     (when (number? date-key)
-      (swap! listing update-in [date-key] (fnil conj []) [(get-elmt ::location) (get-elmt ::name)])
-      (update-ui))))
+      (swap! listing update-in [date-key] (fnil conj [])
+             [(get-elmt activity ::location) (get-elmt activity ::name)])
+      (update-ui activity))))
 ```
 
 Since our listing `atom` no longer references a string, we need to format our map. Since our data structure contains a vector of vectors, we will implement this using two functions to prevent this code from
@@ -559,12 +573,13 @@ looking too ugly: one to format the dates and one to format the events within ea
 
 ```clojure
 (ns org.stuff.events.main
-  (:use [neko.activity :only [defactivity set-content-view!]]
+  (:use [neko.activity :only [defactivity set-content-view! *a]]
+        [neko.find-view :only [find-view]]
+        [neko.ui :only [config]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui config]]
         [clojure.string :only [join]])
-  (:import (java.util Calendar)
-           (android.view View)
+  (:import android.widget.TextView
+           (java.util Calendar)
            (android.app Activity)
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
            (android.app DialogFragment)))
@@ -590,9 +605,7 @@ Let's replace all occurrences in our code that assumes `@listing` to be a string
 
 ```clojure
 (defn main-layout [activity]
-  [:linear-layout {:orientation :vertical,
-                   :id-holder :true,
-                   :def `mylayout}
+  [:linear-layout {:orientation :vertical}
    [:edit-text {:hint "Event name",
                 :id ::name}]
    [:edit-text {:hint "Event location",
@@ -604,19 +617,32 @@ Let's replace all occurrences in our code that assumes `@listing` to be a string
               :on-click (fn [_] (show-picker activity
                                             (date-picker activity)))}]]
    [:button {:text "+ Event",
-             :on-click (fn [_](add-event))}]
-   [:text-view {:text (format-listing @listing),
+             :on-click (fn [_] (add-event activity))}]
+   [:text-view {:text (format-listing @listing)
                 :id ::listing}]])
 ```
 
 And in `update-ui`:
 
 ```clojure
-(defn update-ui []
-  (set-elmt ::listing (format-listing @listing))
-  (set-elmt ::location "")
-  (set-elmt ::name "")
-  (set-elmt ::date ""))
+(defn update-ui [activity]
+  (set-elmt activity ::listing (format-listing @listing))
+  (set-elmt activity ::location "")
+  (set-elmt activity ::name ""))
+```
+
+And in `defactivity`:
+
+```clojure
+(defactivity org.stuff.events.MainActivity
+  :key :main
+  :on-create
+  (fn [this bundle]
+    (on-ui
+      (set-content-view! (*a) (main-layout (*a))))
+    (on-ui
+      (set-elmt (*a) ::listing (format-listing @listing)))
+    ))
 ```
 
 Depending on when you evaluated your new code and if/when you rotated your screen, your running app may have crashed and lost your REPL. Fear not, as this is expected to happen sooner or later. Just enter `lein droid doall` again at the command line.
@@ -627,20 +653,20 @@ Here is the source code so far:
 
 ```clojure
 (ns org.stuff.events.main
-  (:use [neko.activity :only [defactivity set-content-view!]]
+  (:use [neko.activity :only [defactivity set-content-view! *a]]
+        [neko.find-view :only [find-view]]
+        [neko.ui :only [config]]
         [neko.threading :only [on-ui]]
-        [neko.ui :only [make-ui config]]
-        [neko.application :only [defapplication]]
         [clojure.string :only [join]])
-  (:import (java.util Calendar)
-           (android.view View)
+  (:import android.widget.TextView
+           (java.util Calendar)
            (android.app Activity)
            (android.app DatePickerDialog DatePickerDialog$OnDateSetListener)
            (android.app DialogFragment)))
 
-(declare ^android.widget.LinearLayout mylayout)
 (declare add-event)
 (declare date-picker)
+
 (defn show-picker [activity dp]
   (. dp show (. activity getFragmentManager) "datePicker"))
 
@@ -651,17 +677,15 @@ Here is the source code so far:
               (format "%s - %s\n" location event))
             events)
        (join "                      ")))
- 
+
 (defn format-listing [lst]
   (->> (map (fn [[date events]]
-               (format "%s - %s" date (format-events events)))
-             lst)
+              (format "%s - %s" date (format-events events)))
+            lst)
        join))
 
 (defn main-layout [activity]
-  [:linear-layout {:orientation :vertical,
-                   :id-holder :true,
-                   :def `mylayout}
+  [:linear-layout {:orientation :vertical}
    [:edit-text {:hint "Event name",
                 :id ::name}]
    [:edit-text {:hint "Event location",
@@ -673,29 +697,29 @@ Here is the source code so far:
               :on-click (fn [_] (show-picker activity
                                             (date-picker activity)))}]]
    [:button {:text "+ Event",
-             :on-click (fn [_](add-event))}]
-   [:text-view {:text (format-listing @listing),
+             :on-click (fn [_] (add-event activity))}]
+   [:text-view {:text (format-listing @listing)
                 :id ::listing}]])
 
-(defn get-elmt [elmt]
-  (str (.getText (elmt (.getTag mylayout)))))
+(defn get-elmt [activity elmt]
+  (str (.getText ^TextView (find-view activity elmt))))
 
-(defn set-elmt [elmt s]
-  (on-ui (config (elmt (.getTag mylayout)) :text s)))
+(defn set-elmt [activity elmt s]
+  (on-ui (config (find-view activity elmt) :text s)))
 
-(defn update-ui []
-  (set-elmt ::listing (format-listing @listing))
-  (set-elmt ::location "")
-  (set-elmt ::name "")
-  (set-elmt ::date ""))
+(defn update-ui [activity]
+  (set-elmt activity ::listing (format-listing @listing))
+  (set-elmt activity ::location "")
+  (set-elmt activity ::name ""))
 
-(defn add-event []
+(defn add-event [activity]
   (let [date-key (try
-                   (read-string (get-elmt ::date))
+                   (read-string (get-elmt activity ::date))
                    (catch RuntimeException e "Date string is empty!"))]
     (when (number? date-key)
-      (swap! listing update-in [date-key] (fnil conj []) [(get-elmt ::location) (get-elmt ::name)])
-      (update-ui))))
+      (swap! listing update-in [date-key] (fnil conj [])
+             [(get-elmt activity ::location) (get-elmt activity ::name)])
+      (update-ui activity))))
 
 (defn date-picker [activity]
   (proxy [DialogFragment DatePickerDialog$OnDateSetListener] []
@@ -705,22 +729,22 @@ Here is the source code so far:
             month (.get c Calendar/MONTH)
             day (.get c Calendar/DAY_OF_MONTH)]
         (DatePickerDialog. activity this year month day)))
-     (onDateSet [view year month day]
-       (set-elmt ::date
-		 (format "%d%02d%02d" year (inc month) day)))))
+    (onDateSet [view year month day]
+      (set-elmt activity ::date
+                (format "%d%02d%02d" year (inc month) day)))))
 
-(defactivity org.stuff.events.MyActivity
-  :def a
+(defactivity org.stuff.events.MainActivity
+  :key :main
   :on-create
   (fn [this bundle]
     (on-ui
-     (set-content-view! this
-      (make-ui (main-layout this))))
+      (set-content-view! (*a) (main-layout (*a))))
     (on-ui
-     (set-elmt ::listing (format-listing @listing)))))
+      (set-elmt (*a) ::listing (format-listing @listing)))
+    ))
 ```
 
-This is a bit over 100 lines of code. When I first attempted to write this app using Java, I was well over 1000 lines and didn't even have all this functionality before I gave up. If succinctness really is power[<sup>6</sup>](#6), then I'm never looking back.
+This is a slightly below 100 lines of code. When I first attempted to write this app using Java, I was well over 1000 lines and didn't even have all this functionality before I gave up. If succinctness really is power[<sup>6</sup>](#6), then I'm never looking back.
 
 The source code and the entire project directory can be found on [my GitHub](https://github.com/krisc/events).
 
@@ -735,22 +759,16 @@ You will probably run into errors and even bugs with the tools. [adb](http://dev
 <sdk-path>/platform-tools/adb logcat
 ```
 
-`neko` provides [logging](http://alexander-yakushev.github.io/neko/#neko.log) capabilities. Add this to the `:use` directive in the `ns` form:
+`neko` provides [logging](http://alexander-yakushev.github.io/neko/#neko.log) capabilities. Add this to the `:require` directive in the `ns` form:
 
 ```clojure
-[neko.log :only [deflog]]
-```
-
-Add this line near the top of your source file:
-
-```clojure
-(deflog "MyTAG")
+[neko.log :as log]
 ```
 
 Now you can write lines to `adb logcat` by calling something like:
 
 ```clojure
-(log-d "My log message")
+(log/d "My log message")
 ```
 
 #####I lost my REPL!
@@ -760,7 +778,7 @@ Given the instability of the current tools, runtime errors in the code, and othe
 lein do droid run, droid forward-port
 ```
 
-And in `emacs`: `M-x nrepl`, local machine for 'Host', and '9999' for 'Port'. Now in the REPL, run:
+And in `emacs`: `M-x cider`, local machine for 'Host', and '9999' for 'Port'. Now in the REPL, run:
 
 ```clojure
 (in-ns 'org.stuff.events.main)
