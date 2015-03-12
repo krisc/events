@@ -54,7 +54,7 @@ Run this command at the terminal:
 lein droid new events org.stuff.events :activity MainActivity :target-sdk 15 :app-name EventsListing
 ```
 
-This will create a template file structure for an Android app. Open the `project.clj` file and make sure the `neko` version in `:dependencies` is `"3.1.0-preview1"`. Also put the following into `:android` map (change the directory to reflect your own sdk's path):
+This will create a template file structure for an Android app. Open the `project.clj` file and make sure the `neko` version in `:dependencies` is `"3.2.0-preview3"`. Also put the following into `:android` map (change the directory to reflect your own sdk's path):
 
 ```clojure
 :sdk-path "/home/kris/adt-bundle-linux-x86_64-20130522/sdk/"
