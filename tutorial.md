@@ -19,12 +19,12 @@ We will be using Alex Yakushev's [lein-droid](https://github.com/clojure-android
 ```
 Arch Linux
 Java 1.7.0_71
-org.clojure-android/clojure 1.7.0-alpha3
+org.clojure-android/clojure 1.7.0-alpha5
 Leiningen 2.4.2
-lein-droid 0.3.0-beta3
-Android SDK Tools 22.6.3
-org.clojure-android/nrepl 0.2.6
-neko 3.1.0-preview1
+lein-droid 0.3.5
+Android SDK Tools 24.0.2
+org.clojure-android/tools.nrepl 0.2.6-lollipop
+neko 3.2.0-preview3
 ```
 
 Now that you have been **forewarned**, let's begin. If you run into problems, please [open an issue on GitHub](https://github.com/krisc/events/issues), and I'll try my best to help you out.
@@ -45,7 +45,7 @@ Alex's [Tutorial](https://github.com/clojure-android/lein-droid/wiki/Tutorial) i
 
 This is how my `~/.lein/profiles.clj` looks like:
 ```clojure
-{:user {:plugins [ [lein-droid "0.3.0-beta3"] ] }}
+{:user {:plugins [ [lein-droid "0.3.5"] ] }}
 ```
 
 Run this command at the terminal:
