@@ -19,12 +19,12 @@ We will be using Alex Yakushev's [lein-droid](https://github.com/clojure-android
 ```
 Arch Linux
 Java 1.7.0_71
-org.clojure-android/clojure 1.7.0-alpha5
+org.clojure-android/clojure 1.7.0-RC1
 Leiningen 2.4.2
-lein-droid 0.3.5
-Android SDK Tools 24.0.2
-org.clojure-android/tools.nrepl 0.2.6-lollipop
-neko 3.2.0-preview3
+lein-droid 0.4.0-alpha4
+Android SDK Tools 22.6.3
+org.clojure/tools.nrepl 0.2.10
+neko 4.0.0-alpha1
 ```
 
 Now that you have been **forewarned**, let's begin. If you run into problems, please [open an issue on GitHub](https://github.com/krisc/events/issues), and I'll try my best to help you out.
@@ -45,7 +45,7 @@ Alex's [Tutorial](https://github.com/clojure-android/lein-droid/wiki/Tutorial) i
 
 This is how my `~/.lein/profiles.clj` looks like:
 ```clojure
-{:user {:plugins [ [lein-droid "0.3.5"] ] }}
+{:user {:plugins [ [lein-droid "0.4.0-alpha4"] ] }}
 ```
 
 Run this command at the terminal:
@@ -54,7 +54,7 @@ Run this command at the terminal:
 lein droid new events org.stuff.events :activity MainActivity :target-sdk 15 :app-name EventsListing
 ```
 
-This will create a template file structure for an Android app. Open the `project.clj` file and make sure the `neko` version in `:dependencies` is `"3.2.0-preview3"`. Also put the following into `:android` map (change the directory to reflect your own sdk's path):
+This will create a template file structure for an Android app. Open the `project.clj` file and make sure the `neko` version in `:dependencies` is `"4.0.0-alpha1"`. Also put the following into `:android` map (change the directory to reflect your own sdk's path):
 
 ```clojure
 :sdk-path "/home/kris/adt-bundle-linux-x86_64-20130522/sdk/"
@@ -86,8 +86,9 @@ Evaluate this `def` form. Let's change the `defactivity` form to look like this:
 ```clojure
 (defactivity org.stuff.events.MainActivity
   :key :main
-  :on-create
-  (fn [this bundle]
+
+  (onCreate [this bundle]
+    (.superOnCreate this bundle)
     (on-ui
      (set-content-view! (*a) main-layout))
     ))
@@ -133,9 +134,10 @@ In order to access the layout by name, we added a `:id` attributes with a keywor
 
 ```clojure
 (ns org.stuff.events.main
-  (:use [neko.activity :only [defactivity set-content-view! *a]]
-        [neko.find-view :only [find-view]]
-        [neko.threading :only [on-ui]])
+  (:require [neko.activity :refer [defactivity set-content-view!]]
+            [neko.debug :refer [*a]]
+            [neko.find-view :refer [find-view]]
+            [neko.threading :refer [on-ui]])
   (:import android.widget.TextView))
 ```
 
@@ -236,7 +238,7 @@ Next, we want to update the ui with the listing. We can use the `config` macro i
 
 ```clojure
 ...
-[neko.ui :only [config]]
+[neko.ui :refer [config]]
 ...
 ```
 
@@ -292,10 +294,11 @@ If you're coding along at home (and I hope you are!), here is what our code shou
 
 ```clojure
 (ns org.stuff.events.main
-  (:use [neko.activity :only [defactivity set-content-view! *a]]
-        [neko.find-view :only [find-view]]
-        [neko.ui :only [config]]
-        [neko.threading :only [on-ui]])
+  (:require [neko.activity :refer [defactivity set-content-view!]]
+            [neko.debug :refer [*a]]
+            [neko.ui :refer [config]]
+            [neko.find-view :refer [find-view]]
+            [neko.threading :refer [on-ui]])
   (:import android.widget.TextView))
 
 (declare add-event)
@@ -331,8 +334,9 @@ If you're coding along at home (and I hope you are!), here is what our code shou
 
 (defactivity org.stuff.events.MainActivity
   :key :main
-  :on-create
-  (fn [this bundle]
+
+  (onCreate [this bundle]
+    (.superOnCreate this bundle)
     (on-ui
       (set-content-view! (*a) (main-layout (*a))))
     ))
@@ -351,12 +355,12 @@ If you rotated your screen, you may have noticed that the listing disappears. Le
 ```clojure
 (defactivity org.stuff.events.MainActivity
   :key :main
-  :on-create
-  (fn [this bundle]
+
+  (onCreate [this bundle]
+    (.superOnCreate this bundle)
     (on-ui
-      (set-content-view! (*a) (main-layout (*a))))
-    (on-ui
-      (set-elmt (*a) ::listing @listing))
+      (set-content-view! (*a) (main-layout (*a))
+      (set-elmt (*a) ::listing @listing)))
     ))
 ```
 
@@ -375,10 +379,11 @@ First, let's add some imports into our `ns` form:
 
 ```clojure
 (ns org.stuff.events.main
-  (:use [neko.activity :only [defactivity set-content-view! *a]]
-        [neko.find-view :only [find-view]]
-        [neko.ui :only [config]]
-        [neko.threading :only [on-ui]])
+  (:require [neko.activity :refer [defactivity set-content-view!]]
+            [neko.debug :refer [*a]]
+            [neko.ui :refer [on-ui]]
+            [neko.find-view :refer [find-view]]
+            [neko.threading :refer [on-ui]])
   (:import android.widget.TextView
            (java.util Calendar)
            (android.app Activity)
@@ -473,10 +478,11 @@ Go ahead and try it out. Here's what our source file looks like so far:
 
 ```clojure
 (ns org.stuff.events.main
-  (:use [neko.activity :only [defactivity set-content-view! *a]]
-        [neko.find-view :only [find-view]]
-        [neko.ui :only [config]]
-        [neko.threading :only [on-ui]])
+  (:require [neko.activity :refer [defactivity set-content-view!]]
+            [neko.debug :refer [*a]]
+            [neko.ui :refer [on-ui]]
+            [neko.find-view :refer [find-view]]
+            [neko.threading :refer [on-ui]])
   (:import android.widget.TextView
            (java.util Calendar)
            (android.app Activity)
@@ -539,12 +545,12 @@ Go ahead and try it out. Here's what our source file looks like so far:
 
 (defactivity org.stuff.events.MainActivity
   :key :main
-  :on-create
-  (fn [this bundle]
+
+  (onCreate [this bundle]
+    (.superOnCreate this bundle)
     (on-ui
-      (set-content-view! (*a) (main-layout (*a))))
-    (on-ui
-      (set-elmt (*a) ::listing @listing))
+      (set-content-view! (*a) (main-layout (*a))
+      (set-elmt (*a) ::listing @listing)))
     ))
 ```
 
@@ -573,11 +579,12 @@ looking too ugly: one to format the dates and one to format the events within ea
 
 ```clojure
 (ns org.stuff.events.main
-  (:use [neko.activity :only [defactivity set-content-view! *a]]
-        [neko.find-view :only [find-view]]
-        [neko.ui :only [config]]
-        [neko.threading :only [on-ui]]
-        [clojure.string :only [join]])
+  (:require [neko.activity :refer [defactivity set-content-view!]]
+            [neko.debug :refer [*a]]
+            [neko.ui :refer [on-ui]]
+            [clojure.string :refer [join]]
+            [neko.find-view :refer [find-view]]
+            [neko.threading :refer [on-ui]])
   (:import android.widget.TextView
            (java.util Calendar)
            (android.app Activity)
@@ -636,12 +643,12 @@ And in `defactivity`:
 ```clojure
 (defactivity org.stuff.events.MainActivity
   :key :main
-  :on-create
-  (fn [this bundle]
+
+  (onCreate [this bundle]
+    (.superOnCreate this bundle)
     (on-ui
-      (set-content-view! (*a) (main-layout (*a))))
-    (on-ui
-      (set-elmt (*a) ::listing (format-listing @listing)))
+      (set-content-view! (*a) (main-layout (*a))
+      (set-elmt (*a) ::listing (format-listing @listing))))
     ))
 ```
 
@@ -653,11 +660,12 @@ Here is the source code so far:
 
 ```clojure
 (ns org.stuff.events.main
-  (:use [neko.activity :only [defactivity set-content-view! *a]]
-        [neko.find-view :only [find-view]]
-        [neko.ui :only [config]]
-        [neko.threading :only [on-ui]]
-        [clojure.string :only [join]])
+  (:require [neko.activity :refer [defactivity set-content-view!]]
+            [neko.debug :refer [*a]]
+            [neko.ui :refer [on-ui]]
+            [clojure.string :refer [join]]
+            [neko.find-view :refer [find-view]]
+            [neko.threading :refer [on-ui]])
   (:import android.widget.TextView
            (java.util Calendar)
            (android.app Activity)
@@ -735,12 +743,12 @@ Here is the source code so far:
 
 (defactivity org.stuff.events.MainActivity
   :key :main
-  :on-create
-  (fn [this bundle]
+
+  (onCreate [this bundle]
+    (.superOnCreate this bundle)
     (on-ui
-      (set-content-view! (*a) (main-layout (*a))))
-    (on-ui
-      (set-elmt (*a) ::listing (format-listing @listing)))
+      (set-content-view! (*a) (main-layout (*a))
+      (set-elmt (*a) ::listing (format-listing @listing))))
     ))
 ```
 
