@@ -18,13 +18,15 @@ We will be using Alex Yakushev's [lein-droid](https://github.com/clojure-android
 
 ```
 Arch Linux
-Java 1.7.0_71
-org.clojure-android/clojure 1.7.0-RC1
-Leiningen 2.4.2
-lein-droid 0.4.0-alpha4
-Android SDK Tools 22.6.3
+Java 1.7.0_95
+org.clojure-android/clojure 1.7.0-r2
+Leiningen 2.5.3
+lein-droid 0.4.3
+Android SDK Tools 24.4.1
+Android SDK Platform-tools 23.1
+Android SDK Build-tools 23.0.2
 org.clojure/tools.nrepl 0.2.10
-neko 4.0.0-alpha1
+neko 4.0.0-alpha5
 ```
 
 Now that you have been **forewarned**, let's begin. If you run into problems, please [open an issue on GitHub](https://github.com/krisc/events/issues), and I'll try my best to help you out.
@@ -45,16 +47,16 @@ Alex's [Tutorial](https://github.com/clojure-android/lein-droid/wiki/Tutorial) i
 
 This is how my `~/.lein/profiles.clj` looks like:
 ```clojure
-{:user {:plugins [ [lein-droid "0.4.0-alpha4"] ] }}
+{:user {:plugins [ [lein-droid "0.4.3"] ] }}
 ```
 
 Run this command at the terminal:
 
 ```bash
-lein droid new events org.stuff.events :activity MainActivity :target-sdk 15 :app-name EventsListing
+lein new droid events org.stuff.events :activity MainActivity :target-sdk 15 :app-name EventsListing
 ```
 
-This will create a template file structure for an Android app. Open the `project.clj` file and make sure the `neko` version in `:dependencies` is `"4.0.0-alpha1"`. Also put the following into `:android` map (change the directory to reflect your own sdk's path):
+This will create a template file structure for an Android app. Open the `project.clj` file and make sure the `neko` version in `:dependencies` is `"4.0.0-alpha5"`. Also put the following into `:android` map (change the directory to reflect your own sdk's path):
 
 ```clojure
 :sdk-path "/home/kris/adt-bundle-linux-x86_64-20130522/sdk/"
@@ -62,14 +64,13 @@ This will create a template file structure for an Android app. Open the `project
 
 You can also put this option into `profiles.clj` as described [here](https://github.com/clojure-android/lein-droid/wiki/Profiles#android-common). Note that you shouldn't use `:user` profile for this as it is ignored by default in lein-droid projects.
 
-If you have an actual Android device at hand, connect it to your
-computer. If not, you can setup an [emulator](http://developer.android.com/tools/devices/emulator.html). Now run `lein droid doall` at the terminal. This will build the app, install the app to your device, and open an `nREPL` server within the running app.
+If you have an actual Android device at hand, connect it to your computer. If not, you can setup an [emulator](http://developer.android.com/tools/devices/emulator.html). Now run `lein droid doall` at the terminal. This will build the app, install the app to your device, and open an `nREPL` server within the running app.
 
 ### Define the Layout
 
 Let's open the main Clojure source file located at `./src/clojure/org/stuff/events/main.clj` in `emacs` and start defining the layout and the application.
 
-If you don't already have Cider installed, you can install it by running this in `emacs`: `M-x package-install cider`. Now run this in `emacs`: `M-x cider` and enter the local machine for 'Host' and '9999' for 'Port'. Now you have a REPL in `emacs` which is connected to your running app. As you will see in a bit, this is neat-o torpedo.
+If you don't already have Cider installed, you can install it by running this in `emacs`: `M-x package-install cider`. Now run this in `emacs`: `M-x cider-connect` and enter the local machine (e.g. localhost) for 'Host' and '9999' for 'Port'. Now you have a REPL in `emacs` which is connected to your running app. As you will see in a bit, this is neat-o torpedo.
 
 To enter the namespace, type this command into the REPL: `(in-ns 'org.stuff.events.main)` To start evaluating definitions within our app's namespace, evaluate the `ns` form in the source file by entering the `emacs` command `C-c C-n` (or by moving the cursor after the closing parenthesis of the `ns` form and hitting `C-x C-e`).
 
@@ -786,7 +787,7 @@ Given the instability of the current tools, runtime errors in the code, and othe
 lein do droid run, droid forward-port
 ```
 
-And in `emacs`: `M-x cider`, local machine for 'Host', and '9999' for 'Port'. Now in the REPL, run:
+And in `emacs`: `M-x cider-connect`, local machine (e.g. localhost) for 'Host', and '9999' for 'Port'. Now in the REPL, run:
 
 ```clojure
 (in-ns 'org.stuff.events.main)
