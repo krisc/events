@@ -3,37 +3,51 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :min-lein-version "2.0.0"
 
-  :warn-on-reflection true
+  :global-vars {*warn-on-reflection* true}
 
   :source-paths ["src/clojure" "src"]
-  :java-source-paths ["src/java" "gen"]
+  :java-source-paths ["src/java"]
   :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
-  :dependencies [[org.clojure-android/clojure "1.5.1-jb"]
-                 [neko/neko "3.0.0-preview4"]]
-  :profiles {:dev {:dependencies [[android/tools.nrepl "0.2.0-bigstack"]
-                                  [org.clojure-android/clojure-complete "0.3.0-SNAPSHOT"]]
-                   :android {:aot :all-with-unused}}
-             :release {:android
-                       {;; Specify the path to your private keystore
-                        ;; and the the alias of the key you want to
-                        ;; sign APKs with. Do it either here or in
-                        ;; ~/.lein/profiles.clj
-                        ;; :keystore-path "/home/user/.android/private.keystore"
-                        ;; :key-alias "mykeyalias"
-                        :aot :all}}}
-    :android {;; Specify the path to the Android SDK directory either
-            ;; here or in your ~/.lein/profiles.clj file.
-            ;; :sdk-path "/home/user/path/to/android-sdk/"
+  :plugins [[lein-droid "0.3.0-beta4"]]
 
-            ;; Uncomment this if dexer fails with
+  :dependencies [[org.clojure-android/clojure "1.7.0-alpha4" :use-resources true]
+                 [neko/neko "3.1.0-preview3"]]
+  :profiles {:default [:dev]
+
+             :dev
+             [:android-common :android-user
+              {:dependencies [[org.clojure-android/tools.nrepl "0.2.6-lollipop"]]
+               :target-path "target/debug"
+               :android {:aot :all-with-unused
+                         :rename-manifest-package "com.lxsameer.events.debug"
+                         :manifest-options {:app-name "EventListing - debug"}}}]
+             :release
+             [:android-common
+              {:target-path "target/release"
+               :android
+               { ;; Specify the path to your private keystore
+                ;; and the the alias of the key you want to
+                ;; sign APKs with.
+                ;; :keystore-path "/home/user/.android/private.keystore"
+                ;; :key-alias "mykeyalias"
+
+                :ignore-log-priority [:debug :verbose]
+                :aot :all
+                :build-type :release}}]}
+
+  :android {;; Specify the path to the Android SDK directory.
+
+            ;; Try increasing this value if dexer fails with
             ;; OutOfMemoryException. Set the value according to your
             ;; available RAM.
-             :dex-opts ["-JXmx4096M"]
+            :dex-opts ["-JXmx4096M"]
 
             ;; If previous option didn't work, uncomment this as well.
             ;; :force-dex-optimize true
 
-            :target-version "15"
-            :aot-exclude-ns ["clojure.parallel" "clojure.core.reducers"]})
+            :target-version "19"
+            :aot-exclude-ns ["clojure.parallel" "clojure.core.reducers"
+                             "cljs-tooling.complete" "cljs-tooling.info"
+                             "cljs-tooling.util.analysis" "cljs-tooling.util.misc"
+                             "cider.nrepl" "cider-nrepl.plugin"]})
